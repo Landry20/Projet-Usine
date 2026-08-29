@@ -1,0 +1,26 @@
+# =============================================================================
+# GMAO — Environnement local (Lot 1)
+# PostgreSQL 16 — aligné sur le schéma cible CDC §5.2
+# =============================================================================
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gmao-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gmao
+      POSTGRES_USER: gmao
+      POSTGRES_PASSWORD: gmao_app_2026
+      TZ: Africa/Abidjan
+    ports:
+      - "5432:5432"
+    volumes:
+      - gmao_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gmao -d gmao"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+volumes:
+  gmao_postgres_data:

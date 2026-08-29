@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Usine industrielle">
+  <rect width="64" height="64" rx="14" fill="#0B1F3A"/>
+  <!-- Cheminée -->
+  <rect x="16.5" y="18" width="5.2" height="22" fill="#C9A227"/>
+  <rect x="15.4" y="16.2" width="7.4" height="2.6" rx=".6" fill="#D4B03A"/>
+  <!-- Toit -->
+  <path fill="#C9A227" d="M12 32.5 32 18.2 52 32.5H12z"/>
+  <!-- Corps -->
+  <rect x="15" y="32.2" width="34" height="18.5" fill="#C9A227"/>
+  <!-- Fenêtres -->
+  <rect x="19" y="35.2" width="5.2" height="5.2" fill="#0B1F3A"/>
+  <rect x="29.4" y="35.2" width="5.2" height="5.2" fill="#0B1F3A"/>
+  <rect x="39.8" y="35.2" width="5.2" height="5.2" fill="#0B1F3A"/>
+  <!-- Porte -->
+  <rect x="29.6" y="43.2" width="4.8" height="7.5" fill="#0B1F3A"/>
+  <!-- Sol -->
+  <rect x="11" y="50.4" width="42" height="2.2" rx="1" fill="#C9A227"/>
+</svg>
