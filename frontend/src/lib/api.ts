@@ -1,14 +1,16 @@
 /**
  * Connexion frontend → backend.
  * En local, Vite proxy /v1 vers http://127.0.0.1:4000.
- * En production, /v1 est servi par le backend Node sur le même domaine.
+ * En production, l’API est sur le projet Vercel backend.
  */
 import axios, { AxiosError } from 'axios';
 
 const TOKEN_KEY = 'gmao.access';
 const REFRESH_KEY = 'gmao.refresh';
 
-const URL_BACKEND = import.meta.env.VITE_API_URL || '/v1';
+const URL_BACKEND =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://projet-usineapi.vercel.app/v1' : '/v1');
 
 export const api = axios.create({
   baseURL: URL_BACKEND,
