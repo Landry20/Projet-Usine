@@ -6,13 +6,38 @@ Navigateur → https://projet-usine.vercel.app
                  └─ /v1/*      → api/[...path].js → backend NestJS → Neon
 ```
 
-## Configuration Vercel (projet existant)
+## Activer le déploiement automatique depuis GitHub
 
-1. **Root Directory** : vide / `.` (racine du repo, pas `frontend`)
-2. **Framework** : Other
-3. Les commandes viennent de `vercel.json` à la racine
+Le workflow `.github/workflows/cd-vercel.yml` déploie à chaque push sur `main`.
 
-### Variables d’environnement (même projet)
+### 1. Récupérer les IDs Vercel
+
+1. [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create** → copiez le token
+2. Projet `projet-usine` → **Settings → General** :
+   - **Project ID**
+   - **Team / Org ID** (affiché près du Project ID)
+
+### 2. Ajouter les secrets GitHub
+
+Repo [Landry20/Projet-Usine](https://github.com/Landry20/Projet-Usine) → **Settings → Secrets and variables → Actions → New repository secret** :
+
+| Secret | Valeur |
+|---|---|
+| `VERCEL_TOKEN` | token créé ci-dessus |
+| `VERCEL_ORG_ID` | Org / Team ID |
+| `VERCEL_PROJECT_ID` | Project ID |
+
+### 3. Lancer
+
+- Push sur `main`, ou
+- Onglet **Actions** → **CD — Vercel** → **Run workflow**
+
+### Alternative sans Actions
+
+Vercel → projet → **Settings → Git** : connecter le repo, Root Directory = vide.  
+Chaque push déploie aussi (en plus ou à la place des Actions).
+
+## Variables d’environnement Vercel (même projet)
 
 | Variable | Valeur |
 |---|---|
@@ -24,16 +49,4 @@ Navigateur → https://projet-usine.vercel.app
 | `JWT_ACCESS_SECRET` | secret fort |
 | `JWT_REFRESH_SECRET` | autre secret fort |
 
-Pas de `VITE_API_URL` : le frontend appelle `/v1` sur le même domaine.
-
-### Protection
-
-Settings → Deployment Protection → **Off** (sinon l’API est bloquée).
-
-## Local
-
-```bash
-docker compose up -d
-cd backend && npm run seed && npm run start:dev
-cd frontend && npm run dev
-```
+Root Directory : vide (racine). Deployment Protection : **Off**.
