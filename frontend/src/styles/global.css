@@ -93,15 +93,17 @@ code, .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 }
 .brand-row { display: flex; align-items: center; gap: 12px; }
 .brand-icon, .topbar-logo {
-  width: 40px;
-  height: 40px;
+  height: 48px;
+  width: auto;
+  max-width: 168px;
   border-radius: 10px;
   object-fit: contain;
-  background: #0b1f3a;
+  background: #fff;
+  padding: 4px 8px;
   box-shadow: 0 0 0 1px rgba(201,162,39,0.35);
   flex-shrink: 0;
 }
-.topbar-logo { width: 36px; height: 36px; }
+.topbar-logo { height: 40px; max-width: 140px; }
 .brand-kicker { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-400); font-weight: 600; }
 .brand h1 { margin: 4px 0 0; font-size: 18px; color: #fff; font-weight: 600; }
 .nav { padding: 14px 10px; overflow: auto; flex: 1; }
@@ -407,7 +409,7 @@ select option { padding: 8px; }
 .splash h1 { margin: 10px 0 18px; color: #fff; font-size: 26px; }
 .splash p { color: #9db0c6; margin: 14px 0 0; }
 .splash-mark { position: relative; margin-bottom: 18px; }
-.splash-mark img { width: 76px; height: 76px; border-radius: 18px; box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
+.splash-mark img { width: auto; height: 88px; max-width: 220px; border-radius: 12px; background: #fff; padding: 8px 12px; box-shadow: 0 8px 28px rgba(0,0,0,0.35); object-fit: contain; }
 .splash-cog { position: absolute; right: -8px; bottom: -6px; color: var(--gold-400); animation: spin 2.4s linear infinite; }
 .splash-bar {
   width: 168px; height: 3px; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,0.12);
@@ -427,7 +429,7 @@ select option { padding: 8px; }
   100% { transform: translateX(320%); }
 }
 
-.login-app-icon { width: 64px; height: 64px; border-radius: 16px; margin-bottom: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.login-app-icon { width: auto; height: 88px; max-width: 220px; border-radius: 12px; margin-bottom: 18px; background: #fff; padding: 8px 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); object-fit: contain; }
 .sidebar-install { padding: 0 14px 12px; }
 .pwa-chip, .pwa-install {
   width: 100%; justify-content: center;
@@ -435,6 +437,18 @@ select option { padding: 8px; }
 .pwa-chip {
   display: inline-flex; align-items: center; gap: 6px; color: #9db0c6; font-size: 12px; padding: 6px 0;
 }
+.maj-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(7, 21, 37, 0.72);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.maj-carte {
+  width: min(420px, 100%); background: #fff; border-radius: 16px; padding: 28px 24px 22px;
+  text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.28); color: #1a2740;
+}
+.maj-logo { height: 72px; width: auto; max-width: 200px; margin: 0 auto 14px; display: block; }
+.maj-carte h2 { margin: 0 0 8px; font-size: 20px; }
+.maj-carte p { margin: 0 0 18px; color: #5b6b82; font-size: 14px; line-height: 1.45; }
+.maj-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
 .landing {
   min-height: 100%;
@@ -450,7 +464,7 @@ select option { padding: 8px; }
   padding: 20px 40px;
 }
 .landing-brand { display: flex; align-items: center; gap: 12px; color: #fff; }
-.landing-brand img { width: 44px; height: 44px; border-radius: 10px; }
+.landing-brand img { width: auto; height: 52px; max-width: 180px; border-radius: 10px; background: #fff; padding: 4px 8px; object-fit: contain; }
 .landing-brand strong { display: block; font-size: 16px; }
 .landing-brand span { font-size: 12px; color: #9db0c6; }
 .landing-hero { padding: 28px 40px 56px; max-width: 860px; color: #d7e2ef; }
@@ -603,7 +617,7 @@ select option { padding: 8px; }
     gap: 8px;
   }
   .topbar-title { flex: 0 0 auto; }
-  .topbar-logo { width: 32px; height: 32px; }
+  .topbar-logo { height: 32px; max-width: 110px; }
   .topbar .compartiment-choix {
     grid-column: auto;
     order: 0;

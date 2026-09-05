@@ -1,25 +1,29 @@
-import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express, { Request, Response } from 'express';
-import { AppModule } from './app.module';
-import { configurerApp } from './bootstrap';
+import 'reflect-metadata';
+import { Request, Response } from 'express';
+import { DataSource } from 'typeorm';
+import { buildTypeOrmOptions } from './database/database.config';
+import * as entities from './database/entities';
+import { creerAppHttp } from './http/create-app';
 
-let cached: express.Express | undefined;
+const ENTITES = Object.values(entities).filter((v) => typeof v === 'function') as Function[];
 
-async function getServer(): Promise<express.Express> {
+let cached: ReturnType<typeof creerAppHttp> | undefined;
+let ds: DataSource | undefined;
+
+async function getApp() {
   if (cached) return cached;
-
-  const expressApp = express();
-  const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), {
-    logger: ['error', 'warn', 'log'],
-  });
-  configurerApp(nestApp);
-  await nestApp.init();
-  cached = expressApp;
-  return expressApp;
+  if (!ds) {
+    ds = new DataSource({
+      ...buildTypeOrmOptions(process.env, ENTITES),
+      synchronize: false,
+    });
+    await ds.initialize();
+  }
+  cached = creerAppHttp(ds);
+  return cached;
 }
 
 export default async function handler(req: Request, res: Response): Promise<void> {
-  const server = await getServer();
-  server(req, res);
+  const app = await getApp();
+  app(req, res);
 }

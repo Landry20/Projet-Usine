@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { LogoManuPro } from '../../components/brand/LogoManuPro';
 import {
   ArrowRight,
   Boxes,
@@ -18,9 +19,9 @@ export function PresentationPage() {
     <div className="landing">
       <header className="landing-nav">
         <div className="landing-brand">
-          <img src="/logo.svg" alt="Usine industrielle" />
+          <LogoManuPro />
           <div>
-            <strong>Usine industrielle</strong>
+            <strong>ManuPro</strong>
             <span>Production · Produit fini · Laboratoire · Maintenance</span>
           </div>
         </div>

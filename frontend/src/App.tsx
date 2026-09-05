@@ -8,6 +8,7 @@ import { AuditPage, TechniciensPage, UtilisateursPage } from './pages/admin/Admi
 import { ChangerMdpPage } from './pages/auth/ChangerMdpPage';
 import { ConnexionPage } from './pages/auth/ConnexionPage';
 import { ParametresPage, ProfilPage } from './pages/compte/ComptePages';
+import { AlerteMiseAJour } from './components/pwa/AlerteMiseAJour';
 import { PresentationPage } from './pages/public/PresentationPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { DetailDemandePage, ListeDemandesPage, NouvelleDemandePage } from './pages/demandes/DemandesPages';
@@ -67,6 +68,8 @@ function Porte() {
 
 export function App() {
   return (
+    <>
+    <AlerteMiseAJour />
     <Routes>
       <Route path="/" element={<Porte />} />
       <Route path="/connexion" element={<ConnexionPage />} />
@@ -124,5 +127,6 @@ export function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

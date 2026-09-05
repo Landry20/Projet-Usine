@@ -7,7 +7,7 @@ import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { JournalAudit } from '../../database/entities';
 
 @Controller('audit')
-class AuditController {
+export class AuditController {
   constructor(@InjectRepository(JournalAudit) private readonly repo: Repository<JournalAudit>) {}
 
   /** Lecture seule : aucun UPDATE/DELETE n'est exposé. */

@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { ArrowLeft, LogIn, Mail } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { LogoManuPro } from '../../components/brand/LogoManuPro';
 import { ChampMotDePasse } from '../../components/ui/ChampMotDePasse';
 import { ChampTexte } from '../../components/ui/ChampTexte';
 import { useAuth } from '../../hooks/useAuth';
@@ -33,7 +34,7 @@ export function ConnexionPage() {
   return (
     <div className="login-simple">
       <form className="login-box" onSubmit={onSubmit}>
-        <img src="/logo.svg" alt="Usine industrielle" className="login-app-icon" />
+        <LogoManuPro className="login-app-icon" />
         <h2>Connexion</h2>
         <p className="sub">Compte professionnel</p>
         {erreur && <div className="alert alert-err">{erreur}</div>}

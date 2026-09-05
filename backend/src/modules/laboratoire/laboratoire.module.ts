@@ -71,7 +71,7 @@ class DecisionNcDto {
 type UserCtx = { id: number; roleCode?: string };
 
 @Controller()
-class LaboratoireController {
+export class LaboratoireController {
   constructor(
     @InjectRepository(PointPrelevement) private readonly points: Repository<PointPrelevement>,
     @InjectRepository(ParametreAnalyse) private readonly parametres: Repository<ParametreAnalyse>,

@@ -1,12 +1,14 @@
+import { LogoManuPro } from '../brand/LogoManuPro';
+
 /** Écran de chargement plein cadre — session, navigation lourde, premier lancement. */
 export function PageChargement({ message = 'Chargement de la GMAO…' }: { message?: string }) {
   return (
     <div className="splash" role="status" aria-live="polite">
       <div className="splash-mark">
-        <img src="/logo.svg" alt="" width={72} height={72} />
+        <LogoManuPro />
       </div>
-      <div className="brand-kicker">Application industrielle</div>
-      <h1>Usine industrielle</h1>
+      <div className="brand-kicker">Gestion industrielle</div>
+      <h1>ManuPro</h1>
       <div className="splash-bar" />
       <p>{message}</p>
     </div>

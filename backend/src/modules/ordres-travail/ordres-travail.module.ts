@@ -74,7 +74,7 @@ class FiltreOtDto extends PaginationDto {
 }
 
 @Controller()
-class OrdresTravailController {
+export class OrdresTravailController {
   constructor(
     @InjectRepository(OrdreTravail) private readonly repo: Repository<OrdreTravail>,
     @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,

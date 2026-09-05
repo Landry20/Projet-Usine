@@ -40,7 +40,7 @@ class FiltreDiDto extends PaginationDto {
 }
 
 @Controller()
-class DemandesController {
+export class DemandesController {
   constructor(
     @InjectRepository(DemandeIntervention) private readonly repo: Repository<DemandeIntervention>,
     @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,

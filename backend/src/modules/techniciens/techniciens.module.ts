@@ -18,7 +18,7 @@ class TechnicienDto {
 }
 
 @Controller('techniciens')
-class TechniciensController {
+export class TechniciensController {
   constructor(@InjectRepository(Technicien) private readonly repo: Repository<Technicien>) {}
 
   @Get()

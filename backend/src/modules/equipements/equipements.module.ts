@@ -59,7 +59,7 @@ class FiltreEquipementDto extends PaginationDto {
 }
 
 @Controller()
-class EquipementsController {
+export class EquipementsController {
   constructor(
     @InjectRepository(Equipement) private readonly repo: Repository<Equipement>,
     @InjectRepository(FamilleEquipement) private readonly familles: Repository<FamilleEquipement>,

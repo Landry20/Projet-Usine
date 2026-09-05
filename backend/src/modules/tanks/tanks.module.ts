@@ -124,7 +124,7 @@ function volumeDepuisHauteur(bareme: { hauteurCm: number; litres: number }[] | n
 }
 
 @Controller()
-class TanksController {
+export class TanksController {
   constructor(
     @InjectRepository(Tank) private readonly tanks: Repository<Tank>,
     @InjectRepository(TankMouvement) private readonly mvts: Repository<TankMouvement>,

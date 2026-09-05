@@ -27,7 +27,7 @@ const MIME_AUTORISES = new Set([
 ]);
 
 @Controller()
-class UploadsController {
+export class UploadsController {
   constructor(@InjectRepository(PieceJointe) private readonly repo: Repository<PieceJointe>) {}
 
   @Post('ordres-travail/:id/pieces-jointes')

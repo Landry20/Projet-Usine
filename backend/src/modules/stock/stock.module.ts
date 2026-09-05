@@ -57,7 +57,7 @@ class DemandePieceDto {
 }
 
 @Controller()
-class StockController {
+export class StockController {
   constructor(
     @InjectRepository(Article) private readonly articles: Repository<Article>,
     @InjectRepository(MouvementStock) private readonly mvts: Repository<MouvementStock>,

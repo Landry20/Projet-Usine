@@ -40,7 +40,7 @@ class ChampDto {
 }
 
 @Controller()
-class ReferentielsController {
+export class ReferentielsController {
   constructor(
     @InjectRepository(Specialite) private readonly specialites: Repository<Specialite>,
     @InjectRepository(CauseDefaillance) private readonly causes: Repository<CauseDefaillance>,

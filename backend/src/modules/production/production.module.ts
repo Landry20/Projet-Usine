@@ -63,7 +63,7 @@ class ControleDto {
 }
 
 @Controller()
-class ProductionController {
+export class ProductionController {
   constructor(
     @InjectRepository(Produit) private readonly produits: Repository<Produit>,
     @InjectRepository(LigneProduction) private readonly lignes: Repository<LigneProduction>,

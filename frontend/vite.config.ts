@@ -7,14 +7,15 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png'],
+      registerType: 'prompt',
+      injectRegister: null,
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
         id: '/',
-        name: 'Usine industrielle',
-        short_name: 'Usine',
+        name: 'ManuPro',
+        short_name: 'ManuPro',
         description:
-          'Production, produit fini, laboratoire et maintenance — une seule application d’usine.',
+          'Gestion industrielle — production, produit fini, laboratoire et maintenance.',
         lang: 'fr',
         theme_color: '#0B1F3A',
         background_color: '#0B1F3A',

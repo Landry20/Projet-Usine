@@ -16,7 +16,7 @@ import {
 } from '../../database/entities';
 
 @Controller('dashboard')
-class DashboardController {
+export class DashboardController {
   constructor(
     @InjectRepository(OrdreTravail) private readonly ots: Repository<OrdreTravail>,
     @InjectRepository(DemandeIntervention) private readonly dis: Repository<DemandeIntervention>,

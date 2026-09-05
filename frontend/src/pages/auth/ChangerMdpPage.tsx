@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LogoManuPro } from '../../components/brand/LogoManuPro';
 import { ChampMotDePasse } from '../../components/ui/ChampMotDePasse';
 import { authService } from '../../services/auth.service';
 import { messageApi } from '../../lib/api';
@@ -27,7 +28,7 @@ export function ChangerMdpPage() {
   return (
     <div className="login-wrap">
       <section className="login-hero">
-        <img src="/logo.svg" alt="Usine industrielle" className="login-app-icon" />
+        <LogoManuPro className="login-app-icon" />
         <div className="brand-kicker">Sécurité</div>
         <h1>Changement de mot de passe</h1>
         <p>Obligatoire à la première connexion. Complexité contrôlée côté serveur.</p>

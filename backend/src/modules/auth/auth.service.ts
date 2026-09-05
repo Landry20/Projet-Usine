@@ -3,9 +3,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import jwt from 'jsonwebtoken';
 import { MoreThan, Repository } from 'typeorm';
 import { JournalAudit, RefreshToken, Utilisateur } from '../../database/entities';
 import {
@@ -25,17 +24,25 @@ export class AuthService {
     @InjectRepository(Utilisateur) private readonly users: Repository<Utilisateur>,
     @InjectRepository(RefreshToken) private readonly tokens: Repository<RefreshToken>,
     @InjectRepository(JournalAudit) private readonly audit: Repository<JournalAudit>,
-    private readonly jwt: JwtService,
-    private readonly config: ConfigService,
   ) {}
+
+  private signerAcces(user: { id: number; email: string; role: { code: string } }) {
+    const secret = process.env.JWT_ACCESS_SECRET;
+    if (!secret) throw new Error('JWT_ACCESS_SECRET manquant');
+    return jwt.sign(
+      { sub: user.id, email: user.email, role: user.role.code },
+      secret,
+      { expiresIn: (process.env.JWT_ACCESS_TTL ?? '900s') as jwt.SignOptions['expiresIn'] },
+    );
+  }
 
   /**
    * Authentification : vérifie le hash, le verrouillage, l'activation.
    * Ne révèle jamais si l'e-mail existe (message unique).
    */
   async connexion(dto: ConnexionDto, req: { headers: Record<string, unknown>; ip?: string }) {
-    const max = Number(this.config.get('MAX_LOGIN_TENTATIVES') ?? 5);
-    const minutes = Number(this.config.get('VERROUILLAGE_MINUTES') ?? 15);
+    const max = Number(process.env.MAX_LOGIN_TENTATIVES ?? 5);
+    const minutes = Number(process.env.VERROUILLAGE_MINUTES ?? 15);
     const ip = extraireIp(req);
 
     const user = await this.users
@@ -79,13 +86,7 @@ export class AuthService {
     await this.users.save(user);
     await this.journaliser(user.id, 'LOGIN', ip);
 
-    const access = this.jwt.sign(
-      { sub: user.id, email: user.email, role: user.role.code },
-      {
-        secret: this.config.getOrThrow('JWT_ACCESS_SECRET'),
-        expiresIn: this.config.get('JWT_ACCESS_TTL') ?? '900s',
-      },
-    );
+    const access = this.signerAcces(user);
     const refreshBrut = genererJetonAleatoire();
     const expireLe = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await this.tokens.save(
@@ -119,13 +120,7 @@ export class AuthService {
         message: 'Jeton de rafraîchissement invalide ou expiré.',
       });
     }
-    const access = this.jwt.sign(
-      { sub: ligne.utilisateur.id, email: ligne.utilisateur.email, role: ligne.utilisateur.role.code },
-      {
-        secret: this.config.getOrThrow('JWT_ACCESS_SECRET'),
-        expiresIn: this.config.get('JWT_ACCESS_TTL') ?? '900s',
-      },
-    );
+    const access = this.signerAcces(ligne.utilisateur);
     return { accessToken: access, expireDans: 900 };
   }
 

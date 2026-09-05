@@ -19,7 +19,7 @@ export function telechargerRapportPdf(r: RapportPdf) {
   doc.rect(0, 0, paysage ? 297 : 210, 22, 'F');
   doc.setTextColor(201, 162, 39);
   doc.setFontSize(9);
-  doc.text('APPLICATION INDUSTRIELLE', 14, 8);
+  doc.text('ManuPro — Gestion industrielle', 14, 8);
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(14);
   doc.text(r.titre, 14, 16);

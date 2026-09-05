@@ -5,7 +5,7 @@ import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.
 import { Notification } from '../../database/entities';
 
 @Controller('notifications')
-class NotificationsController {
+export class NotificationsController {
   constructor(@InjectRepository(Notification) private readonly repo: Repository<Notification>) {}
 
   @Get()

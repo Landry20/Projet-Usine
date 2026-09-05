@@ -1,16 +1,20 @@
-import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { AppModule } from './app.module';
-import { configurerApp } from './bootstrap';
+import 'reflect-metadata';
+import { DataSource } from 'typeorm';
+import { buildTypeOrmOptions } from './database/database.config';
+import * as entities from './database/entities';
+import { creerAppHttp } from './http/create-app';
 
-async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  configurerApp(app);
+const ENTITES = Object.values(entities).filter((v) => typeof v === 'function') as Function[];
 
+async function demarrer() {
+  const ds = new DataSource({ ...buildTypeOrmOptions(process.env, ENTITES), synchronize: process.env.DB_SYNC === 'true' });
+  await ds.initialize();
+  const app = creerAppHttp(ds);
   const port = Number(process.env.PORT ?? 4000);
-  await app.listen(port);
-  // eslint-disable-next-line no-console
-  console.log(`GMAO API prête sur http://localhost:${port}/v1  — docs : /v1/docs`);
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`ManuPro API (Node.js) prête sur http://localhost:${port}/v1`);
+  });
 }
 
-void bootstrap();
+void demarrer();

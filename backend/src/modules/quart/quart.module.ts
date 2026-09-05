@@ -90,7 +90,7 @@ class ArretDto {
 type UserCtx = { id: number; roleCode?: string };
 
 @Controller()
-class QuartController {
+export class QuartController {
   constructor(
     @InjectRepository(DemandeMatiere) private readonly dms: Repository<DemandeMatiere>,
     @InjectRepository(JournalQuart) private readonly journaux: Repository<JournalQuart>,

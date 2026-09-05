@@ -26,7 +26,7 @@ class LocalisationDto {
 }
 
 @Controller()
-class SitesController {
+export class SitesController {
   constructor(
     @InjectRepository(Site) private readonly sites: Repository<Site>,
     @InjectRepository(Localisation) private readonly locs: Repository<Localisation>,

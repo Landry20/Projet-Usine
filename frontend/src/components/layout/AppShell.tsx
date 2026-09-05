@@ -23,6 +23,7 @@ import { useActualisation } from '../../hooks/useActualisation';
 import { useAuth } from '../../hooks/useAuth';
 import { ACCUEIL_COMPARTIMENT, COMPARTIMENTS, useCompartiment, type CodeCompartiment } from '../../hooks/useCompartiment';
 import { MENUS } from '../../lib/menus';
+import { LogoManuPro } from '../brand/LogoManuPro';
 import { InviteInstallation } from '../pwa/InviteInstallation';
 import { PageChargement } from '../ui/PageChargement';
 
@@ -81,10 +82,10 @@ export function AppShell() {
       <aside className={`sidebar ${tiroir ? 'open' : ''}`}>
         <div className="brand">
           <div className="brand-row">
-            <img src="/logo.svg" alt="Usine industrielle" className="brand-icon" />
+            <LogoManuPro className="brand-icon" />
             <div>
               <div className="brand-kicker">{COMPARTIMENTS.find((c) => c.code === actif)?.kicker}</div>
-              <h1>Usine industrielle</h1>
+              <h1>ManuPro</h1>
             </div>
             <button type="button" className="sidebar-close" aria-label="Fermer le menu" onClick={() => setTiroir(false)}>
               <X size={18} />
@@ -121,7 +122,7 @@ export function AppShell() {
             <button type="button" className="icon-btn btn-menu" aria-label="Ouvrir le menu" onClick={() => setTiroir(true)}>
               <Menu size={18} />
             </button>
-            <img src="/logo.svg" alt="Usine industrielle" className="topbar-logo" />
+            <LogoManuPro className="topbar-logo" />
             <h2>{titrePage(loc.pathname)}</h2>
           </div>
           <div className="compartiment-choix">
