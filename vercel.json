@@ -5,14 +5,15 @@
   "installCommand": "echo skip-root-install",
   "framework": null,
   "functions": {
-    "api/[...path].js": {
+    "api/index.js": {
       "memory": 1024,
       "maxDuration": 60,
-      "includeFiles": "backend/{dist,node_modules,package.json}/**"
+      "includeFiles": "backend/dist/**"
     }
   },
   "rewrites": [
-    { "source": "/v1/:path*", "destination": "/api/v1/:path*" },
+    { "source": "/v1", "destination": "/api?p=/v1" },
+    { "source": "/v1/:path*", "destination": "/api?p=/v1/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
