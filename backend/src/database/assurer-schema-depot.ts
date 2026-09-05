@@ -103,6 +103,41 @@ export async function assurerSchemaDepot(ds: DataSource) {
     SELECT 'BRUT', 'Zone brute', 'BRUTE'
     WHERE NOT EXISTS (SELECT 1 FROM depot WHERE code = 'BRUT')
   `);
+
+  await ds.query(`
+    CREATE TABLE IF NOT EXISTS jaugeage (
+      id SERIAL PRIMARY KEY,
+      tank_id INT NOT NULL,
+      date_jaugeage TIMESTAMP NOT NULL DEFAULT NOW(),
+      hauteur_cm DECIMAL(8,2) NULL,
+      volume_litres DECIMAL(14,2) NOT NULL,
+      temperature DECIMAL(6,2) NULL,
+      densite DECIMAL(8,4) NULL,
+      masse_kg DECIMAL(14,2) NULL,
+      stock_theorique_l DECIMAL(14,2) NULL,
+      ecart_litres DECIMAL(14,2) NULL,
+      ecart_pct DECIMAL(6,3) NULL,
+      effectue_par INT NULL,
+      observation TEXT NULL
+    )
+  `);
+  try {
+    await ds.query(`
+      ALTER TABLE tank_mouvement
+      ALTER COLUMN type_mvt TYPE VARCHAR(40)
+      USING type_mvt::text
+    `);
+  } catch {
+    /* déjà en varchar ou table absente */
+  }
+  await ds.query(`
+    UPDATE tank
+    SET bareme_jaugeage = json_build_array(
+      json_build_object('hauteurCm', 0, 'litres', 0),
+      json_build_object('hauteurCm', 400, 'litres', capacite_litres)
+    )
+    WHERE bareme_jaugeage IS NULL
+  `);
 }
 
 async function ajouterColonne(ds: DataSource, table: string, colonne: string, definition: string) {

@@ -372,7 +372,7 @@ export class TankMouvement {
   @JoinColumn({ name: 'tank_id' })
   tank: Tank;
 
-  @Column({ type: 'enum', enum: TypeMvtTank, name: 'type_mvt' })
+  @Column({ type: 'varchar', length: 40, name: 'type_mvt' })
   typeMvt: TypeMvtTank;
 
   @Column({ type: 'decimal', precision: 14, scale: 2, name: 'quantite_litres' })

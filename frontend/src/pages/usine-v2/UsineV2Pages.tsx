@@ -668,7 +668,7 @@ export function TanksPage() {
   const [tanks, setTanks] = useState<Tank[]>([]);
   const [choisi, setChoisi] = useState<Tank | null>(null);
   const [err, setErr] = useState('');
-  const [jauge, setJauge] = useState({ h: '', ajuster: false });
+  const [jauge, setJauge] = useState({ h: '', volume: '', ajuster: false });
 
   function charger() {
     metier.tanks().then((liste) => {
@@ -681,7 +681,7 @@ export function TanksPage() {
   }, []);
 
   async function ouvrir(t: Tank) {
-    setJauge({ h: '', ajuster: false });
+    setJauge({ h: '', volume: '', ajuster: false });
     try {
       const fiche = await metier.tank(t.id);
       setChoisi({ ...t, ...fiche });
@@ -694,8 +694,15 @@ export function TanksPage() {
     if (!choisi) return;
     setErr('');
     try {
+      const hauteur = jauge.h.trim() === '' ? undefined : Number(jauge.h);
+      const volume = jauge.volume.trim() === '' ? undefined : Number(jauge.volume);
+      if (hauteur == null && volume == null) {
+        setErr('Indiquez une hauteur (cm) ou un volume (L).');
+        return;
+      }
       await metier.jaugerTank(choisi.id, {
-        hauteurCm: Number(jauge.h),
+        ...(hauteur != null && Number.isFinite(hauteur) ? { hauteurCm: hauteur } : {}),
+        ...(volume != null && Number.isFinite(volume) ? { volumeLitres: volume } : {}),
         ajusterStock: jauge.ajuster,
       });
       charger();
@@ -757,16 +764,27 @@ export function TanksPage() {
             {aPermission('tank.gerer') && (
               <div className="form-grid">
                 <label className="field">
+                  Volume observé (L)
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder={choisi.stockLitres}
+                    value={jauge.volume}
+                    onChange={(e) => setJauge({ ...jauge, volume: e.target.value })}
+                  />
+                </label>
+                <label className="field">
                   Hauteur (cm)
-                  <input type="number" value={jauge.h} onChange={(e) => setJauge({ ...jauge, h: e.target.value })} />
+                  <input type="number" min="0" step="0.1" value={jauge.h} onChange={(e) => setJauge({ ...jauge, h: e.target.value })} />
                 </label>
                 <label className="field">
                   <input type="checkbox" checked={jauge.ajuster} onChange={(e) => setJauge({ ...jauge, ajuster: e.target.checked })} />
-                  {' '}Ajuster le stock
+                  {' '}Mettre à jour le niveau du tank
                 </label>
                 <div className="full">
-                  <button type="button" className="btn" onClick={jauger}>
-                    Jaugeage
+                  <button type="button" className="btn btn-primary" onClick={jauger}>
+                    Enregistrer le jaugeage
                   </button>
                 </div>
               </div>
