@@ -12,9 +12,10 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
 import { Repository } from 'typeorm';
 import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
+import { dossierUploads } from '../../common/utils/uploads.util';
 import { PieceJointe } from '../../database/entities';
 import { randomBytes } from 'crypto';
 
@@ -33,7 +34,7 @@ class UploadsController {
   @UseInterceptors(
     FileInterceptor('fichier', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: dossierUploads(),
         filename: (_req, file, cb) => {
           const ext = extname(file.originalname).toLowerCase();
           cb(null, `${Date.now()}-${randomBytes(8).toString('hex')}${ext}`);

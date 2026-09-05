@@ -3,8 +3,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { join } from 'path';
 import { FiltreExceptionsHttp } from './common/filters/http-exception.filter';
+import { dossierUploads } from './common/utils/uploads.util';
 
 /** Middleware, CORS, pipes, Swagger — partagé entre local et Vercel. */
 export function configurerApp(app: INestApplication): void {
@@ -40,7 +40,7 @@ export function configurerApp(app: INestApplication): void {
   expressApp.useGlobalFilters(new FiltreExceptionsHttp());
 
   expressApp.setGlobalPrefix('v1');
-  expressApp.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/v1/fichiers/' });
+  expressApp.useStaticAssets(dossierUploads(), { prefix: '/v1/fichiers/' });
 
   const swagger = new DocumentBuilder()
     .setTitle('API GMAO')
