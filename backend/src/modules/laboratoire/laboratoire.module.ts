@@ -1,28 +1,13 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
   ConclusionBulletin,
   DecisionNc,
-  PERMISSIONS,
   StatutEquip,
   StatutNc,
   StatutValidation,
 } from '../../common/constants/enums';
-import { Permissions } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { genererNumero } from '../../common/utils/numero.util';
 import {
@@ -70,37 +55,30 @@ class DecisionNcDto {
 
 type UserCtx = { id: number; roleCode?: string };
 
-@Controller()
 export class LaboratoireController {
   constructor(
-    @InjectRepository(PointPrelevement) private readonly points: Repository<PointPrelevement>,
-    @InjectRepository(ParametreAnalyse) private readonly parametres: Repository<ParametreAnalyse>,
-    @InjectRepository(Specification) private readonly specs: Repository<Specification>,
-    @InjectRepository(Echantillon) private readonly echantillons: Repository<Echantillon>,
-    @InjectRepository(AnalyseResultat) private readonly analyses: Repository<AnalyseResultat>,
-    @InjectRepository(BulletinAnalyse) private readonly bulletins: Repository<BulletinAnalyse>,
-    @InjectRepository(NonConformite) private readonly ncs: Repository<NonConformite>,
-    @InjectRepository(JournalQuart) private readonly journaux: Repository<JournalQuart>,
-    @InjectRepository(Tank) private readonly tanks: Repository<Tank>,
-    @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,
+    private readonly points: Repository<PointPrelevement>,
+    private readonly parametres: Repository<ParametreAnalyse>,
+    private readonly specs: Repository<Specification>,
+    private readonly echantillons: Repository<Echantillon>,
+    private readonly analyses: Repository<AnalyseResultat>,
+    private readonly bulletins: Repository<BulletinAnalyse>,
+    private readonly ncs: Repository<NonConformite>,
+    private readonly journaux: Repository<JournalQuart>,
+    private readonly tanks: Repository<Tank>,
+    private readonly equipements: Repository<Equipement>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('points-prelevement')
-  @Permissions(PERMISSIONS.LABO_LIRE)
   pointsListe() {
     return this.points.find({ where: { actif: true }, order: { code: 'ASC' } });
   }
 
-  @Get('parametres-analyse')
-  @Permissions(PERMISSIONS.LABO_LIRE)
   paramsListe() {
     return this.parametres.find({ where: { actif: true }, order: { ordreAffichage: 'ASC' } });
   }
 
-  @Get('echantillons')
-  @Permissions(PERMISSIONS.LABO_LIRE)
-  async listerEch(@Query() q: PaginationDto) {
+  async listerEch(q: PaginationDto) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const [donnees, total] = await this.echantillons.findAndCount({
@@ -112,9 +90,7 @@ export class LaboratoireController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('echantillons/:id')
-  @Permissions(PERMISSIONS.LABO_LIRE)
-  async ficheEch(@Param('id', ParseIntPipe) id: number) {
+  async ficheEch(id: number) {
     const e = await this.echantillons.findOne({
       where: { id },
       relations: ['produit', 'point', 'tank', 'preleveur', 'analyses', 'analyses.parametre', 'analyses.specification'],
@@ -124,9 +100,7 @@ export class LaboratoireController {
     return { ...e, bulletin };
   }
 
-  @Post('echantillons')
-  @Permissions(PERMISSIONS.LABO_SAISIR)
-  async creerEch(@Body() dto: EchantillonDto, @UtilisateurCourant() user: UserCtx) {
+  async creerEch(dto: EchantillonDto, user: UserCtx) {
     const numero = await genererNumero(this.ds, 'ECH');
     return this.echantillons.save(
       this.echantillons.create({
@@ -143,12 +117,10 @@ export class LaboratoireController {
   }
 
   /** RG-45 : conformité calculée contre la spécification en vigueur à la date de prélèvement. */
-  @Post('echantillons/:id/analyses')
-  @Permissions(PERMISSIONS.LABO_SAISIR)
   async saisirAnalyse(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: AnalyseDto,
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    dto: AnalyseDto,
+    user: UserCtx,
   ) {
     const ech = await this.echantillons.findOne({ where: { id } });
     if (!ech) throw new NotFoundException({ message: 'Échantillon introuvable.' });
@@ -194,9 +166,7 @@ export class LaboratoireController {
     return this.ficheEch(id);
   }
 
-  @Get('bulletins')
-  @Permissions(PERMISSIONS.LABO_LIRE)
-  async listerBa(@Query() q: PaginationDto & { statut?: StatutValidation }) {
+  async listerBa(q: PaginationDto & { statut?: StatutValidation }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.bulletins
@@ -211,9 +181,7 @@ export class LaboratoireController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('bulletins/:id')
-  @Permissions(PERMISSIONS.LABO_LIRE)
-  async ficheBa(@Param('id', ParseIntPipe) id: number) {
+  async ficheBa(id: number) {
     const b = await this.bulletins.findOne({
       where: { id },
       relations: ['echantillon', 'echantillon.produit', 'echantillon.analyses', 'echantillon.analyses.parametre'],
@@ -222,9 +190,7 @@ export class LaboratoireController {
     return b;
   }
 
-  @Post('bulletins')
-  @Permissions(PERMISSIONS.LABO_SAISIR)
-  async creerBa(@Body() dto: { echantillonId: number; commentaire?: string }, @UtilisateurCourant() user: UserCtx) {
+  async creerBa(dto: { echantillonId: number; commentaire?: string }, user: UserCtx) {
     const existant = await this.bulletins.findOne({ where: { echantillonId: dto.echantillonId } });
     if (existant) return existant;
     const numero = await genererNumero(this.ds, 'BA');
@@ -239,9 +205,7 @@ export class LaboratoireController {
     );
   }
 
-  @Post('bulletins/:id/soumettre')
-  @Permissions(PERMISSIONS.LABO_SAISIR)
-  async soumettreBa(@Param('id', ParseIntPipe) id: number, @UtilisateurCourant() user: UserCtx) {
+  async soumettreBa(id: number, user: UserCtx) {
     const b = await this.bulletins.findOne({ where: { id }, relations: ['echantillon', 'echantillon.analyses'] });
     if (!b) throw new NotFoundException({ message: 'Bulletin introuvable.' });
     if (![StatutValidation.BROUILLON, StatutValidation.RETOURNE].includes(b.statut)) {
@@ -259,9 +223,7 @@ export class LaboratoireController {
     return this.ficheBa(id);
   }
 
-  @Post('bulletins/:id/verifier')
-  @Permissions(PERMISSIONS.LABO_VALIDER)
-  async verifierBa(@Param('id', ParseIntPipe) id: number, @UtilisateurCourant() user: UserCtx) {
+  async verifierBa(id: number, user: UserCtx) {
     const b = await this.bulletins.findOneBy({ id });
     if (!b) throw new NotFoundException({ message: 'Bulletin introuvable.' });
     if (b.statut !== StatutValidation.SOUMIS) {
@@ -276,12 +238,10 @@ export class LaboratoireController {
     return this.ficheBa(id);
   }
 
-  @Post('bulletins/:id/approuver')
-  @Permissions(PERMISSIONS.LABO_VALIDER)
   async approuverBa(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { derogation?: boolean; commentaire?: string },
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    body: { derogation?: boolean; commentaire?: string },
+    user: UserCtx,
   ) {
     const b = await this.bulletins.findOne({ where: { id }, relations: ['echantillon'] });
     if (!b) throw new NotFoundException({ message: 'Bulletin introuvable.' });
@@ -316,9 +276,7 @@ export class LaboratoireController {
     return this.ficheBa(id);
   }
 
-  @Get('non-conformites')
-  @Permissions(PERMISSIONS.LABO_LIRE)
-  async listerNc(@Query() q: PaginationDto & { statut?: StatutNc }) {
+  async listerNc(q: PaginationDto & { statut?: StatutNc }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.ncs
@@ -334,9 +292,7 @@ export class LaboratoireController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Post('non-conformites')
-  @Permissions(PERMISSIONS.LABO_SAISIR)
-  async creerNc(@Body() dto: NcDto) {
+  async creerNc(dto: NcDto) {
     const numero = await genererNumero(this.ds, 'NC');
     return this.ncs.save(
       this.ncs.create({
@@ -350,12 +306,10 @@ export class LaboratoireController {
     );
   }
 
-  @Post('non-conformites/:id/decision')
-  @Permissions(PERMISSIONS.LABO_VALIDER)
   async decisionNc(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: DecisionNcDto,
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    dto: DecisionNcDto,
+    user: UserCtx,
   ) {
     const nc = await this.ncs.findOne({ where: { id }, relations: ['tank'] });
     if (!nc) throw new NotFoundException({ message: 'Non-conformité introuvable.' });
@@ -377,8 +331,6 @@ export class LaboratoireController {
     return nc;
   }
 
-  @Get('dashboard/laboratoire')
-  @Permissions(PERMISSIONS.LABO_LIRE)
   async dashLabo() {
     const [nbEch, enCours, ncOuvertes, bulletins] = await Promise.all([
       this.echantillons.count(),
@@ -402,8 +354,6 @@ export class LaboratoireController {
     };
   }
 
-  @Get('dashboard/direction')
-  @Permissions(PERMISSIONS.DIRECTION_LIRE)
   async dashDirection() {
     const approuves = [StatutValidation.APPROUVE, StatutValidation.DIFFUSE];
     const journaux = await this.journaux.find({ where: approuves.map((s) => ({ statut: s })) });
@@ -432,21 +382,3 @@ export class LaboratoireController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      PointPrelevement,
-      ParametreAnalyse,
-      Specification,
-      Echantillon,
-      AnalyseResultat,
-      BulletinAnalyse,
-      NonConformite,
-      JournalQuart,
-      Tank,
-      Equipement,
-    ]),
-  ],
-  controllers: [LaboratoireController],
-})
-export class LaboratoireModule {}

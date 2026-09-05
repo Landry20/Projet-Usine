@@ -1,11 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { IsBoolean, IsEmail, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
 import { Repository } from 'typeorm';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { hasherMotDePasse, validerComplexiteMotDePasse } from '../../common/utils/crypto.util';
 import { compartimentsDuRole } from '../../common/constants/enums';
 import { Permission, Role, Utilisateur } from '../../database/entities';
+import { BadRequestException, NotFoundException } from '../../common/http-error';
 
 export class CreerUtilisateurDto {
   @IsEmail()
@@ -61,12 +60,11 @@ export class ModifierUtilisateurDto {
   actif?: boolean;
 }
 
-@Injectable()
 export class UtilisateursService {
   constructor(
-    @InjectRepository(Utilisateur) private readonly users: Repository<Utilisateur>,
-    @InjectRepository(Role) private readonly roles: Repository<Role>,
-    @InjectRepository(Permission) private readonly perms: Repository<Permission>,
+    private readonly users: Repository<Utilisateur>,
+    private readonly roles: Repository<Role>,
+    private readonly perms: Repository<Permission>,
   ) {}
 
   async lister(q: PaginationDto) {

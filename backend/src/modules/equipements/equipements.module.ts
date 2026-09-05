@@ -1,28 +1,10 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
 import ExcelJS from 'exceljs';
 import { Repository } from 'typeorm';
-import { PERMISSIONS, StatutEquip, StatutFiche, CriticiteEquip } from '../../common/constants/enums';
-import { Permissions } from '../../common/decorators/permissions.decorator';
+import { StatutEquip, StatutFiche, CriticiteEquip } from '../../common/constants/enums';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { formaterCodeEquipement } from '../../common/utils/numero.util';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
   CompteurReleve,
   Equipement,
@@ -32,7 +14,6 @@ import {
   OrdreTravail,
   Site,
 } from '../../database/entities';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 
 class EquipementDto {
   @IsOptional() @IsString() @MaxLength(30) codeEquipement?: string;
@@ -58,21 +39,18 @@ class FiltreEquipementDto extends PaginationDto {
   @IsOptional() @IsEnum(StatutEquip) statut?: StatutEquip;
 }
 
-@Controller()
 export class EquipementsController {
   constructor(
-    @InjectRepository(Equipement) private readonly repo: Repository<Equipement>,
-    @InjectRepository(FamilleEquipement) private readonly familles: Repository<FamilleEquipement>,
-    @InjectRepository(Localisation) private readonly locs: Repository<Localisation>,
-    @InjectRepository(Site) private readonly sites: Repository<Site>,
-    @InjectRepository(CompteurReleve) private readonly compteurs: Repository<CompteurReleve>,
-    @InjectRepository(OrdreTravail) private readonly ots: Repository<OrdreTravail>,
-    @InjectRepository(ImportLot) private readonly lots: Repository<ImportLot>,
+    private readonly repo: Repository<Equipement>,
+    private readonly familles: Repository<FamilleEquipement>,
+    private readonly locs: Repository<Localisation>,
+    private readonly sites: Repository<Site>,
+    private readonly compteurs: Repository<CompteurReleve>,
+    private readonly ots: Repository<OrdreTravail>,
+    private readonly lots: Repository<ImportLot>,
   ) {}
 
-  @Get('equipements')
-  @Permissions(PERMISSIONS.EQUIPEMENT_LIRE)
-  async lister(@Query() q: FiltreEquipementDto) {
+  async lister(q: FiltreEquipementDto) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.repo
@@ -95,9 +73,7 @@ export class EquipementsController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('equipements/qr/:code')
-  @Permissions(PERMISSIONS.EQUIPEMENT_LIRE)
-  async parQr(@Param('code') code: string) {
+  async parQr(code: string) {
     const e = await this.repo.findOne({
       where: [{ qrCode: code }, { codeEquipement: code }],
       relations: ['famille', 'localisation', 'localisation.site', 'parent'],
@@ -106,15 +82,11 @@ export class EquipementsController {
     return this.fiche(e.id);
   }
 
-  @Get('equipements/:id')
-  @Permissions(PERMISSIONS.EQUIPEMENT_LIRE)
-  fiche(@Param('id', ParseIntPipe) id: number) {
+  fiche(id: number) {
     return this.chargerFiche(id);
   }
 
-  @Post('equipements')
-  @Permissions(PERMISSIONS.EQUIPEMENT_CREER)
-  async creer(@Body() dto: EquipementDto, @UtilisateurCourant() user: { roleCode: string }) {
+  async creer(dto: EquipementDto, user: { roleCode: string }) {
     const code = dto.codeEquipement
       ? dto.codeEquipement.toUpperCase()
       : await this.proposerCode(dto.familleId, dto.localisationId);
@@ -131,9 +103,7 @@ export class EquipementsController {
     return this.chargerFiche(sauve.id);
   }
 
-  @Post('equipements/:id/dupliquer')
-  @Permissions(PERMISSIONS.EQUIPEMENT_CREER)
-  async dupliquer(@Param('id', ParseIntPipe) id: number) {
+  async dupliquer(id: number) {
     const source = await this.repo.findOne({ where: { id } });
     if (!source) throw new NotFoundException({ message: 'Équipement introuvable.' });
     const code = await this.proposerCode(source.familleId ?? undefined, source.localisationId ?? undefined);
@@ -149,9 +119,7 @@ export class EquipementsController {
     return this.chargerFiche(sauve.id);
   }
 
-  @Patch('equipements/:id')
-  @Permissions(PERMISSIONS.EQUIPEMENT_MODIFIER)
-  async modifier(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<EquipementDto>) {
+  async modifier(id: number, dto: Partial<EquipementDto>) {
     const e = await this.repo.findOne({ where: { id } });
     if (!e) throw new NotFoundException({ message: 'Équipement introuvable.' });
     // RG-02 : le code est immuable après création
@@ -161,9 +129,7 @@ export class EquipementsController {
     return this.chargerFiche(id);
   }
 
-  @Delete('equipements/:id')
-  @Permissions(PERMISSIONS.EQUIPEMENT_SUPPRIMER)
-  async supprimer(@Param('id', ParseIntPipe) id: number) {
+  async supprimer(id: number) {
     const e = await this.repo.findOne({ where: { id } });
     if (!e) throw new NotFoundException({ message: 'Équipement introuvable.' });
     e.statut = StatutEquip.REFORME;
@@ -172,11 +138,9 @@ export class EquipementsController {
     return { message: 'Équipement réformé (suppression logique). L\'historique reste consultable.' };
   }
 
-  @Post('compteurs')
-  @Permissions(PERMISSIONS.EQUIPEMENT_MODIFIER)
   async releve(
-    @Body() body: { equipementId: number; valeur: number; dateReleve?: string; unite?: string },
-    @UtilisateurCourant() user: { id: number; roleCode: string },
+    body: { equipementId: number; valeur: number; dateReleve?: string; unite?: string },
+    user: { id: number; roleCode: string },
   ) {
     const dernier = await this.compteurs.findOne({
       where: { equipementId: body.equipementId },
@@ -202,12 +166,9 @@ export class EquipementsController {
     return ligne;
   }
 
-  @Post('equipements/import')
-  @Permissions(PERMISSIONS.EQUIPEMENT_CREER)
-  @UseInterceptors(FileInterceptor('fichier'))
   async importer(
-    @UploadedFile() fichier: Express.Multer.File,
-    @UtilisateurCourant() user: { id: number },
+    fichier: Express.Multer.File,
+    user: { id: number },
   ) {
     if (!fichier) throw new BadRequestException({ message: 'Fichier Excel manquant.' });
     const wb = new ExcelJS.Workbook();
@@ -304,18 +265,3 @@ export class EquipementsController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Equipement,
-      FamilleEquipement,
-      Localisation,
-      Site,
-      CompteurReleve,
-      OrdreTravail,
-      ImportLot,
-    ]),
-  ],
-  controllers: [EquipementsController],
-})
-export class EquipementsModule {}

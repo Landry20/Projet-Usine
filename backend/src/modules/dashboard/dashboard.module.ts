@@ -1,10 +1,6 @@
-import { Controller, Get, Module } from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PERMISSIONS, StatutDemandePiece, StatutDi, StatutOt, TypeMaintenance } from '../../common/constants/enums';
+import { StatutDemandePiece, StatutDi, StatutOt, TypeMaintenance } from '../../common/constants/enums';
 import { serieAnneeSurAnnee } from '../../common/utils/series.util';
-import { Permissions } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import {
   Article,
   DemandeIntervention,
@@ -15,25 +11,22 @@ import {
   Utilisateur,
 } from '../../database/entities';
 
-@Controller('dashboard')
 export class DashboardController {
   constructor(
-    @InjectRepository(OrdreTravail) private readonly ots: Repository<OrdreTravail>,
-    @InjectRepository(DemandeIntervention) private readonly dis: Repository<DemandeIntervention>,
-    @InjectRepository(Article) private readonly articles: Repository<Article>,
-    @InjectRepository(DemandePiece) private readonly dpieces: Repository<DemandePiece>,
-    @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,
-    @InjectRepository(Technicien) private readonly techs: Repository<Technicien>,
-    @InjectRepository(Utilisateur) private readonly users: Repository<Utilisateur>,
+    private readonly ots: Repository<OrdreTravail>,
+    private readonly dis: Repository<DemandeIntervention>,
+    private readonly articles: Repository<Article>,
+    private readonly dpieces: Repository<DemandePiece>,
+    private readonly equipements: Repository<Equipement>,
+    private readonly techs: Repository<Technicien>,
+    private readonly users: Repository<Utilisateur>,
   ) {}
 
   /**
    * Indicateurs calculés côté serveur uniquement (CDC 13).
    * Le frontend n'effectue aucun calcul métier.
    */
-  @Get()
-  @Permissions(PERMISSIONS.KPI_LIRE)
-  async accueil(@UtilisateurCourant() user: { id: number; roleCode: string }) {
+  async accueil(user: { id: number; roleCode: string }) {
     const aujourdHui = new Date().toISOString().slice(0, 10);
     const ouverts = [StatutOt.BROUILLON, StatutOt.PLANIFIE, StatutOt.EN_COURS, StatutOt.EN_ATTENTE, StatutOt.REALISE];
 
@@ -136,18 +129,3 @@ export class DashboardController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      OrdreTravail,
-      DemandeIntervention,
-      Article,
-      DemandePiece,
-      Equipement,
-      Technicien,
-      Utilisateur,
-    ]),
-  ],
-  controllers: [DashboardController],
-})
-export class DashboardModule {}

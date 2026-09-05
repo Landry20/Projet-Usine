@@ -1,30 +1,14 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
   ConclusionBulletin,
-  PERMISSIONS,
   STATUTS_DOCUMENT_VERROUILLE,
   StatutCommandeClient,
   StatutValidation,
   TypeExpedition,
   TypeMvtTank,
 } from '../../common/constants/enums';
-import { Permissions, PermissionsAny } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { genererNumero } from '../../common/utils/numero.util';
 import {
@@ -123,22 +107,19 @@ function volumeDepuisHauteur(bareme: { hauteurCm: number; litres: number }[] | n
   return last.litres;
 }
 
-@Controller()
 export class TanksController {
   constructor(
-    @InjectRepository(Tank) private readonly tanks: Repository<Tank>,
-    @InjectRepository(TankMouvement) private readonly mvts: Repository<TankMouvement>,
-    @InjectRepository(Jaugeage) private readonly jauges: Repository<Jaugeage>,
-    @InjectRepository(Client) private readonly clients: Repository<Client>,
-    @InjectRepository(CommandeClient) private readonly commandes: Repository<CommandeClient>,
-    @InjectRepository(Expedition) private readonly expeditions: Repository<Expedition>,
-    @InjectRepository(Chargement) private readonly chargements: Repository<Chargement>,
-    @InjectRepository(BulletinAnalyse) private readonly bulletins: Repository<BulletinAnalyse>,
+    private readonly tanks: Repository<Tank>,
+    private readonly mvts: Repository<TankMouvement>,
+    private readonly jauges: Repository<Jaugeage>,
+    private readonly clients: Repository<Client>,
+    private readonly commandes: Repository<CommandeClient>,
+    private readonly expeditions: Repository<Expedition>,
+    private readonly chargements: Repository<Chargement>,
+    private readonly bulletins: Repository<BulletinAnalyse>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('tanks')
-  @PermissionsAny(PERMISSIONS.TANK_LIRE, PERMISSIONS.QUART_LIRE)
   async lister() {
     const liste = await this.tanks.find({ relations: ['produit', 'site'], order: { code: 'ASC' } });
     return liste.map((t) => {
@@ -154,9 +135,7 @@ export class TanksController {
     });
   }
 
-  @Get('tanks/:id')
-  @Permissions(PERMISSIONS.TANK_LIRE)
-  async fiche(@Param('id', ParseIntPipe) id: number) {
+  async fiche(id: number) {
     const t = await this.tanks.findOne({ where: { id }, relations: ['produit', 'site'] });
     if (!t) throw new NotFoundException({ message: 'Tank introuvable.' });
     const mouvements = await this.mvts.find({ where: { tankId: id }, order: { dateMvt: 'DESC' }, take: 50 });
@@ -164,9 +143,7 @@ export class TanksController {
     return { ...t, mouvements, jaugeages };
   }
 
-  @Post('tanks')
-  @Permissions(PERMISSIONS.TANK_GERER)
-  creer(@Body() dto: TankDto) {
+  creer(dto: TankDto) {
     return this.tanks.save(
       this.tanks.create({
         code: dto.code.toUpperCase(),
@@ -184,9 +161,7 @@ export class TanksController {
     );
   }
 
-  @Get('tanks/:id/mouvements')
-  @Permissions(PERMISSIONS.TANK_LIRE)
-  mouvements(@Param('id', ParseIntPipe) id: number, @Query() q: PaginationDto) {
+  mouvements(id: number, q: PaginationDto) {
     return this.mvts.find({
       where: { tankId: id },
       order: { dateMvt: 'DESC' },
@@ -195,12 +170,10 @@ export class TanksController {
     });
   }
 
-  @Post('tanks/:id/jaugeages')
-  @Permissions(PERMISSIONS.TANK_GERER)
   async jauger(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: JaugeDto,
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    dto: JaugeDto,
+    user: UserCtx,
   ) {
     const tank = await this.tanks.findOne({ where: { id }, relations: ['produit'] });
     if (!tank) throw new NotFoundException({ message: 'Tank introuvable.' });
@@ -243,15 +216,11 @@ export class TanksController {
     return jauge;
   }
 
-  @Get('clients')
-  @PermissionsAny(PERMISSIONS.PF_LIRE, PERMISSIONS.TANK_LIRE)
   listerClients() {
     return this.clients.find({ where: { actif: true }, order: { raisonSociale: 'ASC' } });
   }
 
-  @Post('clients')
-  @Permissions(PERMISSIONS.PF_GERER)
-  creerClient(@Body() dto: ClientDto) {
+  creerClient(dto: ClientDto) {
     return this.clients.save(
       this.clients.create({
         ...dto,
@@ -260,15 +229,11 @@ export class TanksController {
     );
   }
 
-  @Get('commandes-clients')
-  @Permissions(PERMISSIONS.PF_LIRE)
   commandesListe() {
     return this.commandes.find({ relations: ['client', 'produit'], order: { id: 'DESC' } });
   }
 
-  @Post('commandes-clients')
-  @Permissions(PERMISSIONS.PF_GERER)
-  async creerCommande(@Body() dto: CommandeDto) {
+  async creerCommande(dto: CommandeDto) {
     const numero = await genererNumero(this.ds, 'CC');
     return this.commandes.save(
       this.commandes.create({
@@ -284,9 +249,7 @@ export class TanksController {
     );
   }
 
-  @Get('expeditions')
-  @Permissions(PERMISSIONS.PF_LIRE)
-  async listerExp(@Query() q: PaginationDto & { statut?: StatutValidation }) {
+  async listerExp(q: PaginationDto & { statut?: StatutValidation }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.expeditions
@@ -301,9 +264,7 @@ export class TanksController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('expeditions/:id')
-  @Permissions(PERMISSIONS.PF_LIRE)
-  async ficheExp(@Param('id', ParseIntPipe) id: number) {
+  async ficheExp(id: number) {
     const e = await this.expeditions.findOne({
       where: { id },
       relations: ['client', 'commande', 'chargements', 'chargements.tank', 'chargements.bulletinAnalyse'],
@@ -312,9 +273,7 @@ export class TanksController {
     return e;
   }
 
-  @Post('expeditions')
-  @Permissions(PERMISSIONS.PF_EXPEDIER)
-  async creerExp(@Body() dto: ExpeditionDto) {
+  async creerExp(dto: ExpeditionDto) {
     const numero = await genererNumero(this.ds, 'EXP');
     return this.expeditions.save(
       this.expeditions.create({
@@ -329,12 +288,10 @@ export class TanksController {
     );
   }
 
-  @Post('expeditions/:id/chargements')
-  @Permissions(PERMISSIONS.PF_EXPEDIER)
   async ajouterChargement(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ChargementDto,
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    dto: ChargementDto,
+    user: UserCtx,
   ) {
     const exp = await this.expeditions.findOne({ where: { id } });
     if (!exp) throw new NotFoundException({ message: 'Expédition introuvable.' });
@@ -390,12 +347,10 @@ export class TanksController {
     return this.ficheExp(id);
   }
 
-  @Patch('expeditions/:id/chargements/:cid/pesee')
-  @Permissions(PERMISSIONS.PF_EXPEDIER)
   async pesee(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('cid', ParseIntPipe) cid: number,
-    @Body() dto: { poidsTareKg: number; poidsBrutKg: number },
+    id: number,
+    cid: number,
+    dto: { poidsTareKg: number; poidsBrutKg: number },
   ) {
     const ch = await this.chargements.findOne({ where: { id: cid, expeditionId: id } });
     if (!ch) throw new NotFoundException({ message: 'Chargement introuvable.' });
@@ -410,9 +365,7 @@ export class TanksController {
   }
 
   /** RG-39 : bulletin conforme (ou dérogation) obligatoire avant clôture. */
-  @Post('expeditions/:id/cloturer')
-  @Permissions(PERMISSIONS.PF_EXPEDIER)
-  async cloturer(@Param('id', ParseIntPipe) id: number) {
+  async cloturer(id: number) {
     const exp = await this.expeditions.findOne({
       where: { id },
       relations: ['chargements', 'chargements.bulletinAnalyse', 'commande'],
@@ -465,19 +418,3 @@ export class TanksController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Tank,
-      TankMouvement,
-      Jaugeage,
-      Client,
-      CommandeClient,
-      Expedition,
-      Chargement,
-      BulletinAnalyse,
-    ]),
-  ],
-  controllers: [TanksController],
-})
-export class TanksModule {}

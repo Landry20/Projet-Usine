@@ -1,12 +1,7 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import jwt from 'jsonwebtoken';
 import { MoreThan, Repository } from 'typeorm';
 import { JournalAudit, RefreshToken, Utilisateur } from '../../database/entities';
+import {  UnauthorizedException, ForbiddenException  } from '../../common/http-error';
 import {
   genererJetonAleatoire,
   hasherJeton,
@@ -18,12 +13,11 @@ import { extraireIp } from '../../common/utils/numero.util';
 import { compartimentsDuRole } from '../../common/constants/enums';
 import { ChangerMotDePasseDto, ConnexionDto, ProfilDto } from './auth.dto';
 
-@Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(Utilisateur) private readonly users: Repository<Utilisateur>,
-    @InjectRepository(RefreshToken) private readonly tokens: Repository<RefreshToken>,
-    @InjectRepository(JournalAudit) private readonly audit: Repository<JournalAudit>,
+    private readonly users: Repository<Utilisateur>,
+    private readonly tokens: Repository<RefreshToken>,
+    private readonly audit: Repository<JournalAudit>,
   ) {}
 
   private signerAcces(user: { id: number; email: string; role: { code: string } }) {

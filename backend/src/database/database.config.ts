@@ -1,16 +1,12 @@
-import { ConfigService } from '@nestjs/config';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
-function lireEnv(source: ConfigService | NodeJS.ProcessEnv, key: string, fallback = ''): string {
-  if (source instanceof ConfigService) {
-    return source.get<string>(key) ?? fallback;
-  }
+function lireEnv(source: NodeJS.ProcessEnv, key: string, fallback = ''): string {
   return source[key] ?? fallback;
 }
 
 /** Options TypeORM partagées — Neon (DATABASE_URL) ou Postgres local. */
 export function buildTypeOrmOptions(
-  config: ConfigService | NodeJS.ProcessEnv,
+  config: NodeJS.ProcessEnv,
   entities: Function[],
 ): PostgresConnectionOptions {
   const databaseUrl = lireEnv(config, 'DATABASE_URL');

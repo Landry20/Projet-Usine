@@ -1,32 +1,15 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
+import {  BadRequestException, ForbiddenException, NotFoundException  } from '../../common/http-error';
 import {
   CodeRole,
   OrigineOt,
-  PERMISSIONS,
   PrioriteOt,
   StatutOt,
   TRANSITIONS_OT,
   TypeMaintenance,
   prioriteDepuisCriticite,
 } from '../../common/constants/enums';
-import { Permissions } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { genererNumero } from '../../common/utils/numero.util';
 import {
@@ -73,21 +56,18 @@ class FiltreOtDto extends PaginationDto {
   @IsOptional() @IsString() recherche?: string;
 }
 
-@Controller()
 export class OrdresTravailController {
   constructor(
-    @InjectRepository(OrdreTravail) private readonly repo: Repository<OrdreTravail>,
-    @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,
-    @InjectRepository(OtMainOeuvre) private readonly pointages: Repository<OtMainOeuvre>,
-    @InjectRepository(OtOperation) private readonly operations: Repository<OtOperation>,
-    @InjectRepository(Technicien) private readonly techs: Repository<Technicien>,
-    @InjectRepository(JournalAudit) private readonly audit: Repository<JournalAudit>,
+    private readonly repo: Repository<OrdreTravail>,
+    private readonly equipements: Repository<Equipement>,
+    private readonly pointages: Repository<OtMainOeuvre>,
+    private readonly operations: Repository<OtOperation>,
+    private readonly techs: Repository<Technicien>,
+    private readonly audit: Repository<JournalAudit>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('ordres-travail')
-  @Permissions(PERMISSIONS.OT_LIRE)
-  async lister(@Query() q: FiltreOtDto, @UtilisateurCourant() user: { id: number; roleCode: string }) {
+  async lister(q: FiltreOtDto, user: { id: number; roleCode: string }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.repo
@@ -119,15 +99,11 @@ export class OrdresTravailController {
     );
   }
 
-  @Get('ordres-travail/:id')
-  @Permissions(PERMISSIONS.OT_LIRE)
-  fiche(@Param('id', ParseIntPipe) id: number) {
+  fiche(id: number) {
     return this.charger(id);
   }
 
-  @Post('ordres-travail')
-  @Permissions(PERMISSIONS.OT_CREER)
-  async creer(@Body() dto: CreerOtDto, @UtilisateurCourant() user: { id: number }) {
+  async creer(dto: CreerOtDto, user: { id: number }) {
     const eq = await this.equipements.findOne({ where: { id: dto.equipementId } });
     if (!eq) throw new NotFoundException({ message: 'Équipement introuvable.' });
     const numero = await genererNumero(this.ds, 'OT');
@@ -148,11 +124,8 @@ export class OrdresTravailController {
     return this.charger(ot.id);
   }
 
-  @Patch('ordres-travail/:id')
-  @Permissions(PERMISSIONS.OT_PLANIFIER)
   async planifier(
-    @Param('id', ParseIntPipe) id: number,
-    @Body()
+    id: number,
     dto: {
       datePlanifiee?: string;
       technicienResponsableId?: number;
@@ -160,7 +133,7 @@ export class OrdresTravailController {
       descriptionDemandee?: string;
       coutExterne?: number;
     },
-    @UtilisateurCourant() user: { roleCode: string },
+    user: { roleCode: string },
   ) {
     const ot = await this.repo.findOne({ where: { id } });
     if (!ot) throw new NotFoundException({ message: 'Ordre de travail introuvable.' });
@@ -178,12 +151,10 @@ export class OrdresTravailController {
   }
 
   /** Transitions contrôlées : RG-06, RG-15, RG-16. */
-  @Patch('ordres-travail/:id/statut')
-  @Permissions(PERMISSIONS.OT_EXECUTER)
   async changerStatut(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: StatutOtDto,
-    @UtilisateurCourant() user: { id: number; roleCode: string },
+    id: number,
+    dto: StatutOtDto,
+    user: { id: number; roleCode: string },
   ) {
     const ot = await this.charger(id);
     const autorisees = TRANSITIONS_OT[ot.statut];
@@ -250,12 +221,10 @@ export class OrdresTravailController {
   }
 
   /** Réouverture réservée à l'administrateur, motif + audit (RG-06). */
-  @Post('ordres-travail/:id/rouvrir')
-  @Permissions(PERMISSIONS.OT_CLOTURER)
   async rouvrir(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('motif') motif: string,
-    @UtilisateurCourant() user: { id: number; roleCode: string },
+    id: number,
+    motif: string,
+    user: { id: number; roleCode: string },
   ) {
     if (user.roleCode !== CodeRole.ADMIN) {
       throw new ForbiddenException({ message: 'Seul l\'administrateur peut réouvrir un OT clôturé.' });
@@ -281,12 +250,10 @@ export class OrdresTravailController {
     return this.charger(id);
   }
 
-  @Post('ordres-travail/:id/main-oeuvre')
-  @Permissions(PERMISSIONS.OT_EXECUTER)
   async pointer(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: PointageDto,
-    @UtilisateurCourant() user: { roleCode: string },
+    id: number,
+    dto: PointageDto,
+    user: { roleCode: string },
   ) {
     const ot = await this.repo.findOne({ where: { id } });
     if (!ot) throw new NotFoundException({ message: 'Ordre de travail introuvable.' });
@@ -334,11 +301,8 @@ export class OrdresTravailController {
     return ligne;
   }
 
-  @Patch('ordres-travail/:id/rapport')
-  @Permissions(PERMISSIONS.OT_EXECUTER)
   async rapport(
-    @Param('id', ParseIntPipe) id: number,
-    @Body()
+    id: number,
     dto: {
       travauxRealises?: string;
       diagnostic?: string;
@@ -346,7 +310,7 @@ export class OrdresTravailController {
       remede?: string;
       dureeArretH?: number;
     },
-    @UtilisateurCourant() user: { roleCode: string },
+    user: { roleCode: string },
   ) {
     const ot = await this.repo.findOne({ where: { id } });
     if (!ot) throw new NotFoundException({ message: 'Ordre de travail introuvable.' });
@@ -357,13 +321,11 @@ export class OrdresTravailController {
     return this.charger(id);
   }
 
-  @Patch('ordres-travail/:otId/operations/:opId')
-  @Permissions(PERMISSIONS.OT_EXECUTER)
   async majOperation(
-    @Param('otId', ParseIntPipe) otId: number,
-    @Param('opId', ParseIntPipe) opId: number,
-    @Body() dto: { statut?: string; valeurMesuree?: number; observation?: string; conforme?: boolean },
-    @UtilisateurCourant() user: { roleCode: string },
+    otId: number,
+    opId: number,
+    dto: { statut?: string; valeurMesuree?: number; observation?: string; conforme?: boolean },
+    user: { roleCode: string },
   ) {
     const ot = await this.repo.findOne({ where: { id: otId } });
     if (!ot) throw new NotFoundException({ message: 'Ordre de travail introuvable.' });
@@ -379,11 +341,9 @@ export class OrdresTravailController {
     return op;
   }
 
-  @Post('ordres-travail/:id/operations')
-  @Permissions(PERMISSIONS.OT_PLANIFIER)
   async ajouterOperation(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { libelle: string; obligatoire?: boolean },
+    id: number,
+    dto: { libelle: string; obligatoire?: boolean },
   ) {
     const count = await this.operations.count({ where: { otId: id } });
     return this.operations.save(
@@ -439,18 +399,3 @@ export class OrdresTravailController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      OrdreTravail,
-      Equipement,
-      OtMainOeuvre,
-      OtOperation,
-      Technicien,
-      CauseDefaillance,
-      JournalAudit,
-    ]),
-  ],
-  controllers: [OrdresTravailController],
-})
-export class OrdresTravailModule {}

@@ -6,8 +6,9 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import { join } from 'path';
 import { DataSource } from 'typeorm';
-import { dossierUploads } from '../common/utils/uploads.util';
+import { HttpError } from '../common/http-error';
 import { extraireIp } from '../common/utils/numero.util';
+import { dossierUploads } from '../common/utils/uploads.util';
 import { monterRoutes } from './routes';
 
 function nettoyer(valeur: unknown): unknown {
@@ -76,14 +77,17 @@ export function creerAppHttp(ds: DataSource) {
   monterRoutes(app, ds);
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    const nest = err as { getStatus?: () => number; getResponse?: () => unknown; message?: string; status?: number };
-    const status = typeof nest.getStatus === 'function' ? nest.getStatus() : nest.status ?? 500;
-    const corps = typeof nest.getResponse === 'function' ? nest.getResponse() : { message: nest.message ?? 'Erreur serveur.' };
+    if (err instanceof HttpError) {
+      res.status(err.status).json(err.corps);
+      return;
+    }
+    const e = err as { status?: number; message?: string };
+    const status = e.status ?? 500;
     if (status >= 500 && process.env.NODE_ENV === 'production') {
       res.status(500).json({ message: 'Une erreur interne est survenue.' });
       return;
     }
-    res.status(status).json(typeof corps === 'string' ? { message: corps } : corps);
+    res.status(status).json({ message: e.message ?? 'Erreur serveur.' });
   });
 
   return app;

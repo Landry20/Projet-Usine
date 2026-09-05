@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import { DataSource } from 'typeorm';
 import { PERMISSIONS as P } from '../common/constants/enums';
+import { BadRequestException } from '../common/http-error';
 import { extraireIp } from '../common/utils/numero.util';
 import { dossierUploads } from '../common/utils/uploads.util';
 import * as E from '../database/entities';
@@ -88,12 +89,20 @@ export function monterRoutes(app: Express, ds: DataSource) {
 
   const jwt = middlewareJwt(ds);
   const loginLimit = rateLimit({ windowMs: 60_000, limit: 8, keyGenerator: (req) => extraireIp(req) });
+  const mimeAutorises = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']);
   const fichier = multer({
     storage: multer.diskStorage({
       destination: (_req, _file, cb) => cb(null, dossierUploads()),
       filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/[^\w.\-]/g, '_')}`),
     }),
     limits: { fileSize: 8 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      if (!mimeAutorises.has(file.mimetype)) {
+        cb(new BadRequestException({ message: 'Type de fichier non autorisé (JPEG, PNG, WEBP, PDF).' }));
+        return;
+      }
+      cb(null, true);
+    },
   });
 
   const api = Router();

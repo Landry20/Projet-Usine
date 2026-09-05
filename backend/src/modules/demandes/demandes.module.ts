@@ -1,28 +1,13 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsBoolean, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
   OrigineOt,
-  PERMISSIONS,
   PrioriteOt,
   StatutDi,
   TypeMaintenance,
   prioriteDepuisCriticite,
 } from '../../common/constants/enums';
-import { Permissions } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { genererNumero } from '../../common/utils/numero.util';
 import { DemandeIntervention, Equipement, Notification, OrdreTravail } from '../../database/entities';
@@ -39,19 +24,16 @@ class FiltreDiDto extends PaginationDto {
   @IsOptional() @IsEnum(StatutDi) statut?: StatutDi;
 }
 
-@Controller()
 export class DemandesController {
   constructor(
-    @InjectRepository(DemandeIntervention) private readonly repo: Repository<DemandeIntervention>,
-    @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,
-    @InjectRepository(OrdreTravail) private readonly ots: Repository<OrdreTravail>,
-    @InjectRepository(Notification) private readonly notifs: Repository<Notification>,
+    private readonly repo: Repository<DemandeIntervention>,
+    private readonly equipements: Repository<Equipement>,
+    private readonly ots: Repository<OrdreTravail>,
+    private readonly notifs: Repository<Notification>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('demandes')
-  @Permissions(PERMISSIONS.DEMANDE_LIRE)
-  async lister(@Query() q: FiltreDiDto, @UtilisateurCourant() user: { id: number; roleCode: string }) {
+  async lister(q: FiltreDiDto, user: { id: number; roleCode: string }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.repo
@@ -68,9 +50,7 @@ export class DemandesController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('demandes/:id')
-  @Permissions(PERMISSIONS.DEMANDE_LIRE)
-  async fiche(@Param('id', ParseIntPipe) id: number) {
+  async fiche(id: number) {
     const d = await this.repo.findOne({
       where: { id },
       relations: ['equipement', 'equipement.localisation', 'demandeur'],
@@ -79,9 +59,7 @@ export class DemandesController {
     return d;
   }
 
-  @Post('demandes')
-  @Permissions(PERMISSIONS.DEMANDE_CREER)
-  async creer(@Body() dto: CreerDiDto, @UtilisateurCourant() user: { id: number }) {
+  async creer(dto: CreerDiDto, user: { id: number }) {
     if (dto.clientUuid) {
       const doublon = await this.repo.findOne({ where: { clientUuid: dto.clientUuid } });
       if (doublon) return doublon; // RG-23 idempotence
@@ -104,12 +82,10 @@ export class DemandesController {
   }
 
   /** RG-14 : conversion réservée aux profils habilités, numéro OT généré serveur. */
-  @Post('demandes/:id/convertir')
-  @Permissions(PERMISSIONS.DEMANDE_VALIDER)
   async convertir(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { priorite?: PrioriteOt },
-    @UtilisateurCourant() user: { id: number },
+    id: number,
+    body: { priorite?: PrioriteOt },
+    user: { id: number },
   ) {
     const di = await this.repo.findOne({ where: { id }, relations: ['equipement'] });
     if (!di) throw new NotFoundException({ message: 'Demande introuvable.' });
@@ -146,12 +122,10 @@ export class DemandesController {
     return { demande: di, ordreTravail: ot };
   }
 
-  @Post('demandes/:id/rejeter')
-  @Permissions(PERMISSIONS.DEMANDE_VALIDER)
   async rejeter(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('motif') motif: string,
-    @UtilisateurCourant() user: { id: number },
+    id: number,
+    motif: string,
+    user: { id: number },
   ) {
     if (!motif || motif.trim().length < 3) {
       throw new BadRequestException({ message: 'Le motif de rejet est obligatoire.' });
@@ -179,8 +153,3 @@ export class DemandesController {
   }
 }
 
-@Module({
-  imports: [TypeOrmModule.forFeature([DemandeIntervention, Equipement, OrdreTravail, Notification])],
-  controllers: [DemandesController],
-})
-export class DemandesModule {}

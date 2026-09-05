@@ -1,19 +1,6 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
   PERMISSIONS,
   StatutEquip,
@@ -23,8 +10,6 @@ import {
   TypeMouvement,
   TypeProduit,
 } from '../../common/constants/enums';
-import { Permissions, PermissionsAny } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { genererNumero } from '../../common/utils/numero.util';
 import { serieAnneeSurAnnee } from '../../common/utils/series.util';
@@ -62,23 +47,20 @@ class ControleDto {
   @IsOptional() @IsString() emplacement?: string;
 }
 
-@Controller()
 export class ProductionController {
   constructor(
-    @InjectRepository(Produit) private readonly produits: Repository<Produit>,
-    @InjectRepository(LigneProduction) private readonly lignes: Repository<LigneProduction>,
-    @InjectRepository(Nomenclature) private readonly nomenclatures: Repository<Nomenclature>,
-    @InjectRepository(NomenclatureLigne) private readonly nomLignes: Repository<NomenclatureLigne>,
-    @InjectRepository(OrdreFabrication) private readonly ofs: Repository<OrdreFabrication>,
-    @InjectRepository(LotProduit) private readonly lots: Repository<LotProduit>,
-    @InjectRepository(MouvementProduit) private readonly mvts: Repository<MouvementProduit>,
-    @InjectRepository(Equipement) private readonly equipements: Repository<Equipement>,
+    private readonly produits: Repository<Produit>,
+    private readonly lignes: Repository<LigneProduction>,
+    private readonly nomenclatures: Repository<Nomenclature>,
+    private readonly nomLignes: Repository<NomenclatureLigne>,
+    private readonly ofs: Repository<OrdreFabrication>,
+    private readonly lots: Repository<LotProduit>,
+    private readonly mvts: Repository<MouvementProduit>,
+    private readonly equipements: Repository<Equipement>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('produits')
-  @PermissionsAny(PERMISSIONS.PRODUCTION_LIRE, PERMISSIONS.PF_LIRE)
-  async listerProduits(@Query() q: PaginationDto & { type?: TypeProduit; recherche?: string }) {
+  async listerProduits(q: PaginationDto & { type?: TypeProduit; recherche?: string }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.produits.createQueryBuilder('p').where('p.deletedAt IS NULL').orderBy('p.refProduit', 'ASC');
@@ -89,11 +71,9 @@ export class ProductionController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Post('produits')
-  @PermissionsAny(PERMISSIONS.PRODUCTION_GERER, PERMISSIONS.PF_GERER)
   creerProduit(
-    @Body() dto: ProduitDto,
-    @UtilisateurCourant() user: { roleCode?: string; permissions?: string[] },
+    dto: ProduitDto,
+    user: { roleCode?: string; permissions?: string[] },
   ) {
     const perms = user.permissions ?? [];
     const admin = user.roleCode === 'ADMIN';
@@ -115,27 +95,19 @@ export class ProductionController {
     );
   }
 
-  @Get('lignes-production')
-  @Permissions(PERMISSIONS.PRODUCTION_LIRE)
   lignesListe() {
     return this.lignes.find({ relations: ['equipement', 'site'], order: { code: 'ASC' } });
   }
 
-  @Post('lignes-production')
-  @Permissions(PERMISSIONS.PRODUCTION_GERER)
-  creerLigne(@Body() dto: { code: string; libelle: string; siteId?: number; equipementId?: number }) {
+  creerLigne(dto: { code: string; libelle: string; siteId?: number; equipementId?: number }) {
     return this.lignes.save(this.lignes.create({ ...dto, code: dto.code.toUpperCase() }));
   }
 
-  @Get('nomenclatures')
-  @Permissions(PERMISSIONS.PRODUCTION_LIRE)
   noms() {
     return this.nomenclatures.find({ relations: ['produit', 'lignes', 'lignes.composant'], order: { code: 'ASC' } });
   }
 
-  @Post('nomenclatures')
-  @Permissions(PERMISSIONS.PRODUCTION_GERER)
-  async creerNom(@Body() dto: { code: string; libelle: string; produitId: number; lignes: { composantId: number; quantite: number }[] }) {
+  async creerNom(dto: { code: string; libelle: string; produitId: number; lignes: { composantId: number; quantite: number }[] }) {
     const nom = await this.nomenclatures.save(
       this.nomenclatures.create({ code: dto.code.toUpperCase(), libelle: dto.libelle, produitId: dto.produitId }),
     );
@@ -145,9 +117,7 @@ export class ProductionController {
     return this.nomenclatures.findOne({ where: { id: nom.id }, relations: ['produit', 'lignes', 'lignes.composant'] });
   }
 
-  @Get('ordres-fabrication')
-  @Permissions(PERMISSIONS.PRODUCTION_LIRE)
-  async listerOf(@Query() q: PaginationDto & { statut?: StatutOf }) {
+  async listerOf(q: PaginationDto & { statut?: StatutOf }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.ofs
@@ -163,9 +133,7 @@ export class ProductionController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('ordres-fabrication/:id')
-  @Permissions(PERMISSIONS.PRODUCTION_LIRE)
-  async ficheOf(@Param('id', ParseIntPipe) id: number) {
+  async ficheOf(id: number) {
     const of = await this.ofs.findOne({
       where: { id },
       relations: ['produit', 'nomenclature', 'nomenclature.lignes', 'nomenclature.lignes.composant', 'ligne', 'ligne.equipement'],
@@ -175,9 +143,7 @@ export class ProductionController {
     return { ...of, lots, machineDisponible: of.ligne?.equipement ? of.ligne.equipement.statut === StatutEquip.EN_SERVICE : true };
   }
 
-  @Post('ordres-fabrication')
-  @Permissions(PERMISSIONS.OF_CREER)
-  async creerOf(@Body() dto: OfDto, @UtilisateurCourant() user: { id: number }) {
+  async creerOf(dto: OfDto, user: { id: number }) {
     const numero = await genererNumero(this.ds, 'OF');
     return this.ofs.save(
       this.ofs.create({
@@ -193,12 +159,10 @@ export class ProductionController {
     );
   }
 
-  @Patch('ordres-fabrication/:id/statut')
-  @Permissions(PERMISSIONS.OF_EXECUTER)
   async statutOf(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { statut: StatutOf; motif?: string },
-    @UtilisateurCourant() user: { id: number },
+    id: number,
+    dto: { statut: StatutOf; motif?: string },
+    user: { id: number },
   ) {
     const of = await this.ofs.findOne({ where: { id }, relations: ['ligne', 'ligne.equipement', 'nomenclature', 'nomenclature.lignes'] });
     if (!of) throw new NotFoundException({ message: 'Ordre de fabrication introuvable.' });
@@ -227,9 +191,7 @@ export class ProductionController {
   }
 
   /** Contrôle qualité : conforme → lot + entrée stock PF. */
-  @Post('ordres-fabrication/:id/controle')
-  @Permissions(PERMISSIONS.OF_CLOTURER)
-  async controle(@Param('id', ParseIntPipe) id: number, @Body() dto: ControleDto, @UtilisateurCourant() user: { id: number }) {
+  async controle(id: number, dto: ControleDto, user: { id: number }) {
     const of = await this.ofs.findOne({ where: { id }, relations: ['produit'] });
     if (!of) throw new NotFoundException({ message: 'Ordre de fabrication introuvable.' });
     if (of.statut !== StatutOf.CONTROLE && of.statut !== StatutOf.EN_COURS) {
@@ -270,9 +232,7 @@ export class ProductionController {
     return this.ficheOf(id);
   }
 
-  @Get('lots')
-  @Permissions(PERMISSIONS.PF_LIRE)
-  async listerLots(@Query() q: PaginationDto & { statut?: StatutLot }) {
+  async listerLots(q: PaginationDto & { statut?: StatutLot }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.lots.createQueryBuilder('l').leftJoinAndSelect('l.produit', 'p').leftJoinAndSelect('l.ordreFabrication', 'o').orderBy('l.createdAt', 'DESC');
@@ -282,9 +242,7 @@ export class ProductionController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Post('lots/:id/expedier')
-  @Permissions(PERMISSIONS.PF_EXPEDIER)
-  async expedier(@Param('id', ParseIntPipe) id: number, @Body('quantite') quantite: number, @UtilisateurCourant() user: { id: number }) {
+  async expedier(id: number, quantite: number, user: { id: number }) {
     const lot = await this.lots.findOne({ where: { id }, relations: ['produit'] });
     if (!lot) throw new NotFoundException({ message: 'Lot introuvable.' });
     if (lot.statut !== StatutLot.DISPONIBLE) throw new BadRequestException({ message: 'Ce lot n\'est pas disponible.' });
@@ -297,9 +255,7 @@ export class ProductionController {
     return lot;
   }
 
-  @Get('mouvements-produits')
-  @Permissions(PERMISSIONS.PF_LIRE)
-  async mvtsListe(@Query() q: PaginationDto & { typeStock?: TypeProduit }) {
+  async mvtsListe(q: PaginationDto & { typeStock?: TypeProduit }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.mvts.createQueryBuilder('m').leftJoinAndSelect('m.produit', 'p').orderBy('m.dateMvt', 'DESC');
@@ -309,8 +265,6 @@ export class ProductionController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('dashboard/production')
-  @Permissions(PERMISSIONS.PRODUCTION_LIRE)
   async dashProd() {
     const ouverts = [StatutOf.BROUILLON, StatutOf.PLANIFIE, StatutOf.EN_COURS, StatutOf.EN_ATTENTE, StatutOf.CONTROLE];
     const [ofOuverts, ofAttente, ofJour] = await Promise.all([
@@ -323,8 +277,6 @@ export class ProductionController {
     return { ofOuverts, ofAttente, ofEnCours: ofJour, nbMatieres: mp, series };
   }
 
-  @Get('dashboard/produits-finis')
-  @Permissions(PERMISSIONS.PF_LIRE)
   async dashPf() {
     const [lotsDispo, lotsBloques, valeur] = await Promise.all([
       this.lots.count({ where: { statut: StatutLot.DISPONIBLE } }),
@@ -403,19 +355,3 @@ export class ProductionController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Produit,
-      LigneProduction,
-      Nomenclature,
-      NomenclatureLigne,
-      OrdreFabrication,
-      LotProduit,
-      MouvementProduit,
-      Equipement,
-    ]),
-  ],
-  controllers: [ProductionController],
-})
-export class ProductionModule {}

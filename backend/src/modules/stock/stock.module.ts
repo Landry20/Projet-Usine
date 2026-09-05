@@ -1,22 +1,8 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
-import { PERMISSIONS, StatutDemandePiece, TypeMouvement } from '../../common/constants/enums';
-import { Permissions } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
+import { StatutDemandePiece, TypeMouvement } from '../../common/constants/enums';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
   Article,
   CategorieArticle,
@@ -56,22 +42,19 @@ class DemandePieceDto {
   @IsOptional() @IsString() clientUuid?: string;
 }
 
-@Controller()
 export class StockController {
   constructor(
-    @InjectRepository(Article) private readonly articles: Repository<Article>,
-    @InjectRepository(MouvementStock) private readonly mvts: Repository<MouvementStock>,
-    @InjectRepository(DemandePiece) private readonly demandesPieces: Repository<DemandePiece>,
-    @InjectRepository(OtPiece) private readonly otPieces: Repository<OtPiece>,
-    @InjectRepository(OrdreTravail) private readonly ots: Repository<OrdreTravail>,
-    @InjectRepository(Notification) private readonly notifs: Repository<Notification>,
-    @InjectRepository(Utilisateur) private readonly users: Repository<Utilisateur>,
+    private readonly articles: Repository<Article>,
+    private readonly mvts: Repository<MouvementStock>,
+    private readonly demandesPieces: Repository<DemandePiece>,
+    private readonly otPieces: Repository<OtPiece>,
+    private readonly ots: Repository<OrdreTravail>,
+    private readonly notifs: Repository<Notification>,
+    private readonly users: Repository<Utilisateur>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('articles')
-  @Permissions(PERMISSIONS.STOCK_LIRE)
-  async listerArticles(@Query() q: PaginationDto & { recherche?: string; critique?: string }) {
+  async listerArticles(q: PaginationDto & { recherche?: string; critique?: string }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.articles
@@ -90,8 +73,6 @@ export class StockController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('articles/critiques')
-  @Permissions(PERMISSIONS.STOCK_LIRE)
   critiques() {
     return this.articles
       .createQueryBuilder('a')
@@ -101,9 +82,7 @@ export class StockController {
       .getMany();
   }
 
-  @Get('articles/:id')
-  @Permissions(PERMISSIONS.STOCK_LIRE)
-  async ficheArticle(@Param('id', ParseIntPipe) id: number) {
+  async ficheArticle(id: number) {
     const a = await this.articles.findOne({
       where: { id },
       relations: ['categorie', 'fournisseurPrincipal'],
@@ -118,9 +97,7 @@ export class StockController {
     return { ...a, mouvements };
   }
 
-  @Post('articles')
-  @Permissions(PERMISSIONS.STOCK_ENTRER)
-  creerArticle(@Body() dto: ArticleDto) {
+  creerArticle(dto: ArticleDto) {
     return this.articles.save(
       this.articles.create({
         ...dto,
@@ -136,15 +113,11 @@ export class StockController {
    * POST /v1/mouvements-stock
    * Le stock n'est jamais modifié par un PATCH de quantité (RG-03 / RG-04).
    */
-  @Post('mouvements-stock')
-  @Permissions(PERMISSIONS.STOCK_ENTRER)
-  async mouvement(@Body() dto: MouvementDto, @UtilisateurCourant() user: { id: number }) {
+  async mouvement(dto: MouvementDto, user: { id: number }) {
     return this.executerMouvement(dto, user.id);
   }
 
-  @Get('mouvements-stock')
-  @Permissions(PERMISSIONS.STOCK_LIRE)
-  async listerMvts(@Query() q: PaginationDto & { articleId?: string; type?: TypeMouvement }) {
+  async listerMvts(q: PaginationDto & { articleId?: string; type?: TypeMouvement }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.mvts
@@ -160,9 +133,7 @@ export class StockController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('demandes-pieces')
-  @Permissions(PERMISSIONS.STOCK_LIRE)
-  listerDemandes(@Query('statut') statut?: StatutDemandePiece) {
+  listerDemandes(statut?: StatutDemandePiece) {
     return this.demandesPieces.find({
       where: statut ? { statut } : {},
       relations: ['article', 'ordreTravail', 'ordreTravail.equipement'],
@@ -171,12 +142,10 @@ export class StockController {
   }
 
   /** Le technicien demande une pièce : pas de décrément stock (RG-26). */
-  @Post('ordres-travail/:id/pieces')
-  @Permissions(PERMISSIONS.STOCK_DEMANDER)
   async demanderPiece(
-    @Param('id', ParseIntPipe) otId: number,
-    @Body() dto: DemandePieceDto,
-    @UtilisateurCourant() user: { id: number; roleCode: string },
+    otId: number,
+    dto: DemandePieceDto,
+    user: { id: number; roleCode: string },
   ) {
     const ot = await this.ots.findOne({ where: { id: otId } });
     if (!ot) throw new NotFoundException({ message: 'Ordre de travail introuvable.' });
@@ -200,18 +169,14 @@ export class StockController {
     return this.demandesPieces.findOne({ where: { id: dp.id }, relations: ['article', 'ordreTravail'] });
   }
 
-  @Post('demandes-pieces/:id/valider')
-  @Permissions(PERMISSIONS.STOCK_SORTIR)
-  valider(@Param('id', ParseIntPipe) id: number, @UtilisateurCourant() user: { id: number }) {
+  valider(id: number, user: { id: number }) {
     return this.validerDemande(id, user);
   }
 
-  @Post('demandes-pieces/:id/refuser')
-  @Permissions(PERMISSIONS.STOCK_SORTIR)
   async refuser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('motif') motif: string,
-    @UtilisateurCourant() user: { id: number },
+    id: number,
+    motif: string,
+    user: { id: number },
   ) {
     const dp = await this.demandesPieces.findOne({ where: { id } });
     if (!dp) throw new NotFoundException({ message: 'Demande de pièce introuvable.' });
@@ -339,19 +304,3 @@ export class StockController {
   }
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Article,
-      CategorieArticle,
-      MouvementStock,
-      DemandePiece,
-      OtPiece,
-      OrdreTravail,
-      Notification,
-      Utilisateur,
-    ]),
-  ],
-  controllers: [StockController],
-})
-export class StockModule {}

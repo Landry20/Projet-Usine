@@ -1,20 +1,7 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Module,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { DataSource, EntityManager, Repository } from 'typeorm';
+import {  BadRequestException, NotFoundException  } from '../../common/http-error';
 import {
-  PERMISSIONS,
   PrioriteOt,
   STATUTS_DOCUMENT_VERROUILLE,
   StatutDemandeMatiere,
@@ -24,8 +11,6 @@ import {
   TypeMvtTank,
   TypeProduit,
 } from '../../common/constants/enums';
-import { Permissions, PermissionsAny } from '../../common/decorators/permissions.decorator';
-import { UtilisateurCourant } from '../../common/decorators/utilisateur-courant.decorator';
 import { paginer, PaginationDto } from '../../common/dto/pagination.dto';
 import { genererNumero } from '../../common/utils/numero.util';
 import {
@@ -89,23 +74,20 @@ class ArretDto {
 
 type UserCtx = { id: number; roleCode?: string };
 
-@Controller()
 export class QuartController {
   constructor(
-    @InjectRepository(DemandeMatiere) private readonly dms: Repository<DemandeMatiere>,
-    @InjectRepository(JournalQuart) private readonly journaux: Repository<JournalQuart>,
-    @InjectRepository(JournalEntree) private readonly entrees: Repository<JournalEntree>,
-    @InjectRepository(JournalSortie) private readonly sorties: Repository<JournalSortie>,
-    @InjectRepository(JournalArret) private readonly arrets: Repository<JournalArret>,
-    @InjectRepository(Produit) private readonly produits: Repository<Produit>,
-    @InjectRepository(LigneProduction) private readonly lignes: Repository<LigneProduction>,
-    @InjectRepository(Parametre) private readonly params: Repository<Parametre>,
+    private readonly dms: Repository<DemandeMatiere>,
+    private readonly journaux: Repository<JournalQuart>,
+    private readonly entrees: Repository<JournalEntree>,
+    private readonly sorties: Repository<JournalSortie>,
+    private readonly arrets: Repository<JournalArret>,
+    private readonly produits: Repository<Produit>,
+    private readonly lignes: Repository<LigneProduction>,
+    private readonly params: Repository<Parametre>,
     private readonly ds: DataSource,
   ) {}
 
-  @Get('demandes-matiere')
-  @PermissionsAny(PERMISSIONS.QUART_LIRE, PERMISSIONS.PRODUCTION_LIRE)
-  async listerDm(@Query() q: PaginationDto & { statut?: StatutDemandeMatiere }) {
+  async listerDm(q: PaginationDto & { statut?: StatutDemandeMatiere }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.dms
@@ -122,9 +104,7 @@ export class QuartController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Post('demandes-matiere')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
-  async creerDm(@Body() dto: CreerDmDto, @UtilisateurCourant() user: UserCtx) {
+  async creerDm(dto: CreerDmDto, user: UserCtx) {
     const produit = await this.produits.findOne({ where: { id: dto.produitId } });
     if (!produit) throw new NotFoundException({ message: 'Produit introuvable.' });
     if (produit.typeProduit !== TypeProduit.MATIERE_PREMIERE) {
@@ -145,12 +125,10 @@ export class QuartController {
   }
 
   /** RG-31 : le stock magasin baisse uniquement au service. Écart → motif obligatoire. */
-  @Post('demandes-matiere/:id/servir')
-  @PermissionsAny(PERMISSIONS.QUART_SAISIR, PERMISSIONS.PRODUCTION_GERER)
   async servirDm(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ServirDmDto,
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    dto: ServirDmDto,
+    user: UserCtx,
   ) {
     return this.ds.transaction(async (m) => {
       const dm = await m.findOne(DemandeMatiere, { where: { id }, relations: ['produit'] });
@@ -199,9 +177,7 @@ export class QuartController {
     });
   }
 
-  @Post('demandes-matiere/:id/refuser')
-  @PermissionsAny(PERMISSIONS.QUART_SAISIR, PERMISSIONS.PRODUCTION_GERER)
-  async refuserDm(@Param('id', ParseIntPipe) id: number, @Body('motif') motif: string) {
+  async refuserDm(id: number, motif: string) {
     if (!motif || motif.trim().length < 3) {
       throw new BadRequestException({ message: 'Le motif de refus est obligatoire.' });
     }
@@ -215,9 +191,7 @@ export class QuartController {
     return this.dms.save(dm);
   }
 
-  @Get('journaux-quart')
-  @Permissions(PERMISSIONS.QUART_LIRE)
-  async listerJournaux(@Query() q: PaginationDto & { statut?: StatutValidation }) {
+  async listerJournaux(q: PaginationDto & { statut?: StatutValidation }) {
     const page = Number(q.page ?? 1);
     const limite = Number(q.limite ?? 25);
     const qb = this.journaux
@@ -233,9 +207,7 @@ export class QuartController {
     return paginer(donnees, total, page, limite);
   }
 
-  @Get('journaux-quart/:id')
-  @Permissions(PERMISSIONS.QUART_LIRE)
-  async ficheJournal(@Param('id', ParseIntPipe) id: number) {
+  async ficheJournal(id: number) {
     const j = await this.journaux.findOne({
       where: { id },
       relations: [
@@ -257,9 +229,7 @@ export class QuartController {
     return j;
   }
 
-  @Post('journaux-quart')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
-  async creerJournal(@Body() dto: CreerJournalDto, @UtilisateurCourant() user: UserCtx) {
+  async creerJournal(dto: CreerJournalDto, user: UserCtx) {
     const ligne = await this.lignes.findOne({ where: { id: dto.ligneId } });
     if (!ligne) throw new NotFoundException({ message: 'Ligne de production introuvable.' });
     const existant = await this.journaux.findOne({
@@ -284,9 +254,7 @@ export class QuartController {
     );
   }
 
-  @Post('journaux-quart/:id/entrees')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
-  async ajouterEntree(@Param('id', ParseIntPipe) id: number, @Body() dto: EntreeDto) {
+  async ajouterEntree(id: number, dto: EntreeDto) {
     const j = await this.journalModifiable(id);
     if (dto.demandeMatiereId) {
       const dm = await this.dms.findOne({ where: { id: dto.demandeMatiereId } });
@@ -314,9 +282,7 @@ export class QuartController {
     return this.ficheJournal(j.id);
   }
 
-  @Post('journaux-quart/:id/sorties')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
-  async ajouterSortie(@Param('id', ParseIntPipe) id: number, @Body() dto: SortieDto) {
+  async ajouterSortie(id: number, dto: SortieDto) {
     const j = await this.journalModifiable(id);
     const produit = await this.produits.findOne({ where: { id: dto.produitId } });
     if (!produit) throw new NotFoundException({ message: 'Produit introuvable.' });
@@ -338,12 +304,10 @@ export class QuartController {
   }
 
   /** RG-35 : arrêt ≥ seuil → DI maintenance générée côté serveur. */
-  @Post('journaux-quart/:id/arrets')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
   async ajouterArret(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ArretDto,
-    @UtilisateurCourant() user: UserCtx,
+    id: number,
+    dto: ArretDto,
+    user: UserCtx,
   ) {
     const j = await this.journalModifiable(id);
     const ligne = await this.lignes.findOne({ where: { id: j.ligneId }, relations: ['equipement'] });
@@ -390,9 +354,7 @@ export class QuartController {
     return this.ficheJournal(j.id);
   }
 
-  @Post('journaux-quart/:id/soumettre')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
-  async soumettre(@Param('id', ParseIntPipe) id: number, @Body() body: { commentaireEcart?: string }, @UtilisateurCourant() user: UserCtx) {
+  async soumettre(id: number, body: { commentaireEcart?: string }, user: UserCtx) {
     const j = await this.journalModifiable(id);
     await this.recalculerBilan(j.id);
     const fresh = await this.journaux.findOneByOrFail({ id: j.id });
@@ -421,9 +383,7 @@ export class QuartController {
     return this.ficheJournal(id);
   }
 
-  @Post('journaux-quart/:id/verifier')
-  @Permissions(PERMISSIONS.QUART_VALIDER)
-  async verifier(@Param('id', ParseIntPipe) id: number, @UtilisateurCourant() user: UserCtx) {
+  async verifier(id: number, user: UserCtx) {
     const j = await this.journaux.findOneBy({ id });
     if (!j) throw new NotFoundException({ message: 'Journal de quart introuvable.' });
     if (j.statut !== StatutValidation.SOUMIS) {
@@ -439,9 +399,7 @@ export class QuartController {
   }
 
   /** Approbation : pousse le PF vers les tanks (pont production → produit fini). */
-  @Post('journaux-quart/:id/approuver')
-  @Permissions(PERMISSIONS.QUART_VALIDER)
-  async approuver(@Param('id', ParseIntPipe) id: number, @UtilisateurCourant() user: UserCtx) {
+  async approuver(id: number, user: UserCtx) {
     return this.ds.transaction(async (m) => {
       const j = await m.findOne(JournalQuart, { where: { id }, relations: ['sorties', 'sorties.produit'] });
       if (!j) throw new NotFoundException({ message: 'Journal de quart introuvable.' });
@@ -490,9 +448,7 @@ export class QuartController {
     }).then(() => this.ficheJournal(id));
   }
 
-  @Post('journaux-quart/:id/retourner')
-  @Permissions(PERMISSIONS.QUART_VALIDER)
-  async retourner(@Param('id', ParseIntPipe) id: number, @Body('motif') motif: string) {
+  async retourner(id: number, motif: string) {
     if (!motif || motif.trim().length < 3) {
       throw new BadRequestException({ message: 'Le motif de retour est obligatoire.' });
     }
@@ -508,9 +464,7 @@ export class QuartController {
   }
 
   /** RG-34 : un rapport approuvé n’est plus modifié — on crée un rectificatif. */
-  @Post('journaux-quart/:id/rectificatif')
-  @Permissions(PERMISSIONS.QUART_SAISIR)
-  async rectificatif(@Param('id', ParseIntPipe) id: number, @UtilisateurCourant() user: UserCtx) {
+  async rectificatif(id: number, user: UserCtx) {
     const source = await this.ficheJournal(id);
     if (!STATUTS_DOCUMENT_VERROUILLE.includes(source.statut as (typeof STATUTS_DOCUMENT_VERROUILLE)[number])) {
       throw new BadRequestException({ message: 'Un rectificatif ne s’applique qu’à un rapport déjà approuvé.' });
@@ -632,26 +586,3 @@ export async function appliquerMouvementTank(
   );
 }
 
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      DemandeMatiere,
-      JournalQuart,
-      JournalEntree,
-      JournalSortie,
-      JournalArret,
-      Produit,
-      LigneProduction,
-      Parametre,
-      Tank,
-      TankMouvement,
-      Equipement,
-      DemandeIntervention,
-      Notification,
-      MouvementProduit,
-    ]),
-  ],
-  controllers: [QuartController],
-  exports: [TypeOrmModule],
-})
-export class QuartModule {}
