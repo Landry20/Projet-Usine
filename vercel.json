@@ -8,7 +8,7 @@
     "api/index.js": {
       "memory": 1024,
       "maxDuration": 60,
-      "includeFiles": "backend/dist/**"
+      "includeFiles": "{backend/dist/**,backend/node_modules/**,backend/package.json}"
     }
   },
   "rewrites": [
