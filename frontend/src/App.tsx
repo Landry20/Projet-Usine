@@ -15,7 +15,9 @@ import { DetailDemandePage, ListeDemandesPage, NouvelleDemandePage } from './pag
 import { FicheEquipementPage, ListeEquipementsPage, NouvelEquipementPage } from './pages/equipements/EquipementsPages';
 import { FicheOtPage, ListeOtPage, NouvelOtPage } from './pages/ordres-travail/OtPages';
 import {
+  ArrivagePage,
   DashboardProductionPage,
+  DepotPage,
   FicheOfPage,
   LignesPage,
   ListeOfPage,
@@ -89,6 +91,8 @@ export function App() {
         <Route path="/production/ordres/nouveau" element={<NouvelOfPage />} />
         <Route path="/production/ordres/:id" element={<FicheOfPage />} />
         <Route path="/production/matieres" element={<MatieresPage />} />
+        <Route path="/production/depot" element={<DepotPage />} />
+        <Route path="/production/arrivage" element={<ArrivagePage />} />
         <Route path="/production/nomenclatures" element={<NomenclaturesPage />} />
         <Route path="/production/lignes" element={<LignesPage />} />
         <Route path="/produits-finis" element={<DashboardPfPage />} />

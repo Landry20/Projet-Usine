@@ -12,9 +12,11 @@ import { dateFr } from '../../lib/libelles';
 import { messageApi } from '../../lib/api';
 import { metier } from '../../services/metier.service';
 import type {
+  ArrivageMatiere,
   DashboardProduction,
   Equipement,
   LigneProduction,
+  LotDepot,
   Nomenclature,
   OrdreFabrication,
   Produit,
@@ -542,7 +544,7 @@ export function MatieresPage() {
       <div className="page-head">
         <div>
           <h2>Matières premières</h2>
-          <p>Stock distinct des pièces de maintenance et des produits finis. La quantité change uniquement par mouvement.</p>
+          <p>Une matière principale suffit. Le stock augmente par les arrivages dans le dépôt.</p>
         </div>
         <div className="page-head-actions">
           <BoutonRecherche />
@@ -901,6 +903,294 @@ export function LignesPage() {
           </div>
         </form>
       )}
+    </div>
+  );
+}
+
+export function DepotPage() {
+  const { aPermission } = useAuth();
+  const [lots, setLots] = useState<LotDepot[]>([]);
+  const [mp, setMp] = useState<Produit[]>([]);
+  const [form, setForm] = useState({ libelle: '', produitId: '', capacite: '', emplacement: '' });
+  const [err, setErr] = useState('');
+
+  function charger() {
+    metier.lotsDepot().then(setLots);
+    metier.produits({ type: 'MATIERE_PREMIERE', limite: 200 }).then((p) => setMp(p.donnees));
+  }
+  useEffect(() => {
+    charger();
+  }, []);
+
+  async function creer(e: FormEvent) {
+    e.preventDefault();
+    setErr('');
+    try {
+      await metier.creerLotDepot({
+        libelle: form.libelle,
+        produitId: Number(form.produitId),
+        capacite: form.capacite ? Number(form.capacite) : undefined,
+        emplacement: form.emplacement || undefined,
+      });
+      setForm({ libelle: '', produitId: form.produitId, capacite: '', emplacement: '' });
+      charger();
+    } catch (ex) {
+      setErr(messageApi(ex));
+    }
+  }
+
+  return (
+    <div>
+      <div className="page-head">
+        <div>
+          <h2>Dépôt</h2>
+          <p>Créez les lots où la matière première est stockée. L’arrivage remplit ensuite ces lots.</p>
+        </div>
+        <div className="page-head-actions">
+          <BoutonActualiser />
+          <BoutonPdf
+            compact
+            rapport={{
+              titre: 'Lots du dépôt',
+              compartiment: 'Production',
+              colonnes: ['N°', 'Lot', 'Matière', 'Quantité', 'Capacité', 'Emplacement'],
+              lignes: lots.map((l) => [
+                l.numero,
+                l.libelle,
+                l.produit?.designation ?? '',
+                l.quantite,
+                l.capacite ?? '—',
+                l.emplacement ?? '—',
+              ]),
+              nomFichier: 'rapport-depot.pdf',
+            }}
+          />
+        </div>
+      </div>
+      {aPermission('production.gerer') && (
+        <form className="card" onSubmit={creer}>
+          <div className="card-h">
+            <h3>Nouveau lot</h3>
+          </div>
+          <div className="card-b form-grid">
+            {err && <div className="alert alert-err full">{err}</div>}
+            <label className="field">
+              Nom du lot
+              <input required value={form.libelle} onChange={(e) => setForm({ ...form, libelle: e.target.value })} placeholder="Ex. Lot A, Silo 1" />
+            </label>
+            <label className="field">
+              Matière première
+              <Selecteur required value={form.produitId} onChange={(e) => setForm({ ...form, produitId: e.target.value })}>
+                <option value="">—</option>
+                {mp.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.refProduit} — {p.designation}
+                  </option>
+                ))}
+              </Selecteur>
+            </label>
+            <label className="field">
+              Capacité
+              <input type="number" min="0" step="0.001" value={form.capacite} onChange={(e) => setForm({ ...form, capacite: e.target.value })} placeholder="Optionnel" />
+            </label>
+            <label className="field">
+              Emplacement
+              <input value={form.emplacement} onChange={(e) => setForm({ ...form, emplacement: e.target.value })} placeholder="Zone, allée…" />
+            </label>
+            <div className="full">
+              <button className="btn btn-primary">
+                <Plus size={16} />
+                Créer le lot
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+      <div className="card">
+        <table className="data">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Lot</th>
+              <th>Matière</th>
+              <th>Quantité</th>
+              <th>Capacité</th>
+              <th>Remplissage</th>
+              <th>Emplacement</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lots.map((l) => {
+              const qte = Number(l.quantite);
+              const cap = l.capacite != null ? Number(l.capacite) : null;
+              const pct = cap && cap > 0 ? Math.round((1000 * qte) / cap) / 10 : null;
+              return (
+                <tr key={l.id}>
+                  <td className="mono">{l.numero}</td>
+                  <td>{l.libelle}</td>
+                  <td>{l.produit?.designation ?? '—'}</td>
+                  <td>
+                    {l.quantite} {l.produit?.unite ?? ''}
+                  </td>
+                  <td>{l.capacite ?? '—'}</td>
+                  <td>{pct != null ? `${pct} %` : '—'}</td>
+                  <td>{l.emplacement ?? '—'}</td>
+                </tr>
+              );
+            })}
+            {lots.length === 0 && (
+              <tr>
+                <td colSpan={7}>Aucun lot. Créez-en un pour recevoir les arrivages.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+export function ArrivagePage() {
+  const { aPermission } = useAuth();
+  const [lots, setLots] = useState<LotDepot[]>([]);
+  const [arrivages, setArrivages] = useState<ArrivageMatiere[]>([]);
+  const [form, setForm] = useState({ lotDepotId: '', quantite: '', referenceBl: '', commentaire: '' });
+  const [err, setErr] = useState('');
+  const [ok, setOk] = useState('');
+
+  function charger() {
+    metier.lotsDepot().then(setLots);
+    metier.arrivages().then(setArrivages);
+  }
+  useEffect(() => {
+    charger();
+  }, []);
+
+  async function creer(e: FormEvent) {
+    e.preventDefault();
+    setErr('');
+    setOk('');
+    try {
+      await metier.creerArrivage({
+        lotDepotId: Number(form.lotDepotId),
+        quantite: Number(form.quantite),
+        referenceBl: form.referenceBl || undefined,
+        commentaire: form.commentaire || undefined,
+      });
+      setForm({ lotDepotId: form.lotDepotId, quantite: '', referenceBl: '', commentaire: '' });
+      setOk('Arrivage enregistré. Le lot du dépôt a été mis à jour.');
+      charger();
+    } catch (ex) {
+      setErr(messageApi(ex));
+    }
+  }
+
+  const lotChoisi = lots.find((l) => String(l.id) === form.lotDepotId);
+
+  return (
+    <div>
+      <div className="page-head">
+        <div>
+          <h2>Arrivage</h2>
+          <p>Enregistrez l’entrée de matière première dans un lot du dépôt.</p>
+        </div>
+        <div className="page-head-actions">
+          <BoutonActualiser />
+          <BoutonPdf
+            compact
+            rapport={{
+              titre: 'Arrivages matière première',
+              compartiment: 'Production',
+              colonnes: ['N°', 'Date', 'Lot', 'Matière', 'Quantité', 'BL'],
+              lignes: arrivages.map((a) => [
+                a.numero,
+                dateFr(a.dateArrivage),
+                a.lotDepot?.libelle ?? a.lotDepot?.numero ?? '',
+                a.produit?.designation ?? '',
+                a.quantite,
+                a.referenceBl ?? '—',
+              ]),
+              nomFichier: 'rapport-arrivages.pdf',
+            }}
+          />
+        </div>
+      </div>
+      {aPermission('production.gerer') && (
+        <form className="card" onSubmit={creer}>
+          <div className="card-h">
+            <h3>Nouvel arrivage</h3>
+          </div>
+          <div className="card-b form-grid">
+            {err && <div className="alert alert-err full">{err}</div>}
+            {ok && <div className="alert alert-ok full">{ok}</div>}
+            <label className="field">
+              Lot du dépôt
+              <Selecteur required value={form.lotDepotId} onChange={(e) => setForm({ ...form, lotDepotId: e.target.value })}>
+                <option value="">—</option>
+                {lots.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.numero} — {l.libelle}
+                    {l.produit ? ` (${l.produit.designation})` : ''}
+                  </option>
+                ))}
+              </Selecteur>
+            </label>
+            <label className="field">
+              Quantité {lotChoisi?.produit?.unite ? `(${lotChoisi.produit.unite})` : ''}
+              <input required type="number" min="0.001" step="0.001" value={form.quantite} onChange={(e) => setForm({ ...form, quantite: e.target.value })} />
+            </label>
+            <label className="field">
+              N° bon / BL
+              <input value={form.referenceBl} onChange={(e) => setForm({ ...form, referenceBl: e.target.value })} />
+            </label>
+            <label className="field full">
+              Commentaire
+              <input value={form.commentaire} onChange={(e) => setForm({ ...form, commentaire: e.target.value })} />
+            </label>
+            <div className="full">
+              <button className="btn btn-primary">
+                <Plus size={16} />
+                Enregistrer l’arrivage
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+      <div className="card">
+        <table className="data">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Date</th>
+              <th>Lot</th>
+              <th>Matière</th>
+              <th>Quantité</th>
+              <th>BL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {arrivages.map((a) => (
+              <tr key={a.id}>
+                <td className="mono">{a.numero}</td>
+                <td>{dateFr(a.dateArrivage)}</td>
+                <td>
+                  {a.lotDepot?.numero} {a.lotDepot?.libelle}
+                </td>
+                <td>{a.produit?.designation ?? '—'}</td>
+                <td>
+                  {a.quantite} {a.produit?.unite ?? ''}
+                </td>
+                <td>{a.referenceBl ?? '—'}</td>
+              </tr>
+            ))}
+            {arrivages.length === 0 && (
+              <tr>
+                <td colSpan={6}>Aucun arrivage enregistré.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

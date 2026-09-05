@@ -375,6 +375,8 @@ function titrePage(path: string) {
   if (path.startsWith('/production/journaux')) return 'Journaux de quart';
   if (path.startsWith('/production/ordres')) return 'Ordres de fabrication';
   if (path.startsWith('/production/matieres')) return 'Matières premières';
+  if (path.startsWith('/production/depot')) return 'Dépôt';
+  if (path.startsWith('/production/arrivage')) return 'Arrivage';
   if (path.startsWith('/production/nomenclatures')) return 'Nomenclatures';
   if (path.startsWith('/production/lignes')) return 'Lignes de production';
   if (path.startsWith('/production')) return 'Gestion de production';

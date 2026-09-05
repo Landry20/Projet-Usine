@@ -265,6 +265,32 @@ export interface Nomenclature {
   lignes?: NomenclatureLigne[];
 }
 
+export interface LotDepot {
+  id: number;
+  numero: string;
+  libelle: string;
+  produitId: number;
+  capacite?: string | null;
+  quantite: string;
+  emplacement?: string | null;
+  actif: boolean;
+  produit?: Produit;
+}
+
+export interface ArrivageMatiere {
+  id: number;
+  numero: string;
+  lotDepotId: number;
+  produitId: number;
+  quantite: string;
+  referenceBl?: string | null;
+  commentaire?: string | null;
+  dateArrivage: string;
+  lotDepot?: LotDepot;
+  produit?: Produit;
+  utilisateur?: { id: number; nom: string; prenom?: string | null } | null;
+}
+
 export interface LotProduit {
   id: number;
   numero: string;

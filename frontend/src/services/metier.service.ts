@@ -1,5 +1,6 @@
 import { api } from '../lib/api';
 import type {
+  ArrivageMatiere,
   Article,
   BulletinAnalyse,
   ClientUsine,
@@ -16,6 +17,7 @@ import type {
   DemandePiece,
   Equipement,
   LigneProduction,
+  LotDepot,
   LotProduit,
   Mouvement,
   MouvementProduit,
@@ -126,6 +128,11 @@ export const metier = {
     api.post<LotProduit>(`/lots/${id}/expedier`, { quantite }).then((r) => r.data),
   mouvementsProduits: (params?: Record<string, unknown>) =>
     api.get<ReponsePaginee<MouvementProduit>>('/mouvements-produits', { params }).then((r) => r.data),
+  lotsDepot: () => api.get<LotDepot[]>('/lots-depot').then((r) => r.data),
+  creerLotDepot: (payload: Record<string, unknown>) => api.post<LotDepot>('/lots-depot', payload).then((r) => r.data),
+  arrivages: () => api.get<ArrivageMatiere[]>('/arrivages').then((r) => r.data),
+  creerArrivage: (payload: Record<string, unknown>) =>
+    api.post<ArrivageMatiere>('/arrivages', payload).then((r) => r.data),
 
   demandesMatiere: (params?: Record<string, unknown>) =>
     api.get<ReponsePaginee<DemandeMatiere>>('/demandes-matiere', { params }).then((r) => r.data),

@@ -26,6 +26,8 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
       { to: '/production/journaux', label: 'Journaux de quart', Icon: ClipboardList },
       { to: '/production/ordres', label: 'Ordres de fabrication', Icon: Factory },
       { to: '/production/matieres', label: 'Matières premières', Icon: Package },
+      { to: '/production/depot', label: 'Dépôt', Icon: Warehouse },
+      { to: '/production/arrivage', label: 'Arrivage', Icon: Truck },
       { to: '/production/nomenclatures', label: 'Nomenclatures', Icon: ClipboardList },
       { to: '/production/lignes', label: 'Lignes / machines', Icon: Settings },
     ],
