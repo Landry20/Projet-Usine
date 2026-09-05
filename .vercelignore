@@ -1,10 +1,10 @@
-backend/node_modules
-frontend/node_modules
 **/node_modules
 .git
-backend/dist
-frontend/dist
 **/.env
 backend/.env
+frontend/.env
 uploads
 *.log
+backend/dist
+frontend/dist
+**/.DS_Store
