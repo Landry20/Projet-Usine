@@ -1,14 +1,17 @@
 /**
- * Couche HTTP unique.
- * Les pages n'appellent jamais axios directement : elles passent par les services.
+ * Connexion frontend → backend.
+ * En local, Vite proxy /v1 vers http://127.0.0.1:4000.
+ * En production, /v1 est servi par le backend Node (backend/handler.js).
  */
 import axios, { AxiosError } from 'axios';
 
 const TOKEN_KEY = 'gmao.access';
 const REFRESH_KEY = 'gmao.refresh';
 
+const URL_BACKEND = import.meta.env.VITE_API_URL || '/v1';
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/v1',
+  baseURL: URL_BACKEND,
   timeout: 20000,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -54,7 +57,7 @@ export async function assurerAccessValide(): Promise<boolean> {
   if (!renouvellementEnCours) {
     renouvellementEnCours = axios
       .post<{ accessToken: string; refreshToken?: string }>(
-        `${import.meta.env.VITE_API_URL || '/v1'}/auth/refresh`,
+        `${URL_BACKEND}/auth/refresh`,
         { refreshToken: refresh },
       )
       .then(({ data }) => {
