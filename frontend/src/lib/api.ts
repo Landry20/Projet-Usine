@@ -1,7 +1,7 @@
 /**
  * Connexion frontend → backend.
  * En local, Vite proxy /v1 vers http://127.0.0.1:4000.
- * En production, /v1 est servi par le backend Node (backend/handler.js).
+ * En production, /v1 est servi par le backend Node sur le même domaine.
  */
 import axios, { AxiosError } from 'axios';
 

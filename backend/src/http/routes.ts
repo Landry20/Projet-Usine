@@ -100,6 +100,7 @@ export function monterRoutes(app: Express, ds: DataSource) {
   app.use('/v1', api);
 
   api.get('/sante', (_req, res) => res.json({ ok: true, nom: 'ManuPro' }));
+  api.get('/docs', (_req, res) => res.json({ nom: 'ManuPro API', prefixe: '/v1', sante: '/v1/sante' }));
 
   api.post('/auth/login', loginLimit, asyncRoute((req) => auth.connexion(req.body, req)));
   api.post('/auth/refresh', asyncRoute((req) => auth.rafraichir(req.body)));
