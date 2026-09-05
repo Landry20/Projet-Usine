@@ -5,6 +5,8 @@
   "installCommand": "echo skip-root-install",
   "framework": null,
   "rewrites": [
+    { "source": "/v1", "destination": "https://projet-usineapi.vercel.app/v1" },
+    { "source": "/v1/:path*", "destination": "https://projet-usineapi.vercel.app/v1/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
