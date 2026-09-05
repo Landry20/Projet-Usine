@@ -78,6 +78,8 @@ export async function assurerAccessValide(): Promise<boolean> {
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem(TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  const usine = sessionStorage.getItem('gmao.usine');
+  if (usine) config.headers['X-Usine-Id'] = usine;
   return config;
 });
 

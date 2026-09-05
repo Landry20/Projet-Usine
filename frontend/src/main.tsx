@@ -6,6 +6,7 @@ import { ActualisationProvider } from './hooks/useActualisation';
 import { AuthProvider } from './hooks/useAuth';
 import { ChargementProvider } from './hooks/useChargement';
 import { CompartimentProvider } from './hooks/useCompartiment';
+import { UsineProvider } from './hooks/useUsine';
 import './styles/global.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -13,11 +14,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <CompartimentProvider>
+          <UsineProvider>
           <ChargementProvider>
             <ActualisationProvider>
               <App />
             </ActualisationProvider>
           </ChargementProvider>
+          </UsineProvider>
         </CompartimentProvider>
       </AuthProvider>
     </BrowserRouter>

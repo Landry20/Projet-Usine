@@ -5,14 +5,18 @@ import type {
   BulletinAnalyse,
   ClientUsine,
   DashboardData,
+  DashboardDepot,
   DashboardDirection,
   DashboardLabo,
+  DemandeAchat,
+  DepotZone,
   DashboardPf,
   DashboardProduction,
   Demande,
   DemandeMatiere,
   Echantillon,
   Expedition,
+  Fournisseur,
   JournalQuart,
   DemandePiece,
   Equipement,
@@ -20,6 +24,7 @@ import type {
   LotDepot,
   LotProduit,
   Mouvement,
+  MouvementLotDepot,
   MouvementProduit,
   Nomenclature,
   NonConformite,
@@ -30,6 +35,7 @@ import type {
   OrdreTravail,
   Produit,
   ReponsePaginee,
+  Site,
   Tank,
   Technicien,
 } from '../types';
@@ -39,12 +45,13 @@ export const metier = {
   notifications: () => api.get<NotificationItem[]>('/notifications').then((r) => r.data),
 
   sites: () => api.get('/sites').then((r) => r.data),
+  usines: () => api.get<Site[]>('/usines').then((r) => r.data),
   localisations: () => api.get('/localisations').then((r) => r.data),
   familles: () => api.get('/familles').then((r) => r.data),
   specialites: () => api.get('/specialites').then((r) => r.data),
   causes: () => api.get('/causes').then((r) => r.data),
   categories: () => api.get('/categories-articles').then((r) => r.data),
-  fournisseurs: () => api.get('/fournisseurs').then((r) => r.data),
+  fournisseurs: () => api.get<Fournisseur[]>('/fournisseurs').then((r) => r.data),
   parametres: () => api.get('/parametres').then((r) => r.data),
 
   equipements: (params?: Record<string, unknown>) =>
@@ -122,6 +129,8 @@ export const metier = {
     api.patch<OrdreFabrication>(`/ordres-fabrication/${id}/statut`, payload).then((r) => r.data),
   controleOf: (id: number, payload: Record<string, unknown>) =>
     api.post<OrdreFabrication>(`/ordres-fabrication/${id}/controle`, payload).then((r) => r.data),
+  remplirTankOf: (id: number, payload: Record<string, unknown>) =>
+    api.post<Tank>(`/ordres-fabrication/${id}/remplir-tank`, payload).then((r) => r.data),
   lots: (params?: Record<string, unknown>) =>
     api.get<ReponsePaginee<LotProduit>>('/lots', { params }).then((r) => r.data),
   expedierLot: (id: number, quantite?: number) =>
@@ -133,6 +142,18 @@ export const metier = {
   arrivages: () => api.get<ArrivageMatiere[]>('/arrivages').then((r) => r.data),
   creerArrivage: (payload: Record<string, unknown>) =>
     api.post<ArrivageMatiere>('/arrivages', payload).then((r) => r.data),
+  depots: () => api.get<DepotZone[]>('/depots').then((r) => r.data),
+  creerDepot: (payload: Record<string, unknown>) => api.post<DepotZone>('/depots', payload).then((r) => r.data),
+  dashboardDepot: () => api.get<DashboardDepot>('/dashboard/depot').then((r) => r.data),
+  transfererLotDepot: (id: number, payload: Record<string, unknown>) =>
+    api.post<LotDepot>(`/lots-depot/${id}/transfert`, payload).then((r) => r.data),
+  mouvementsLotsDepot: () => api.get<MouvementLotDepot[]>('/mouvements-lots-depot').then((r) => r.data),
+  demandesAchat: () => api.get<DemandeAchat[]>('/demandes-achat').then((r) => r.data),
+  creerDemandeAchat: (payload: Record<string, unknown>) =>
+    api.post<DemandeAchat>('/demandes-achat', payload).then((r) => r.data),
+  validerDemandeAchat: (id: number) => api.post<DemandeAchat>(`/demandes-achat/${id}/valider`).then((r) => r.data),
+  rejeterDemandeAchat: (id: number, motif: string) =>
+    api.post<DemandeAchat>(`/demandes-achat/${id}/rejeter`, { motif }).then((r) => r.data),
 
   demandesMatiere: (params?: Record<string, unknown>) =>
     api.get<ReponsePaginee<DemandeMatiere>>('/demandes-matiere', { params }).then((r) => r.data),

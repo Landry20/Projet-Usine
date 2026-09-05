@@ -142,6 +142,15 @@ code, .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 .compartiment-select { display: none; }
 .sel-opt-ligne { display: inline-flex; align-items: center; gap: 8px; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; justify-self: end; }
+.usine-select {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f3f5f8; border: 1px solid var(--ink-200); border-radius: 8px;
+  padding: 4px 8px; color: var(--ink-700); font-size: 12px; font-weight: 650;
+}
+.usine-select select {
+  border: 0; background: transparent; font: inherit; color: inherit; max-width: 160px;
+}
+.usine-fixe { font-size: 12px; font-weight: 650; color: var(--ink-700); white-space: nowrap; }
 .compartiment-switch {
   display: inline-flex;
   background: #f3f5f8;
@@ -779,6 +788,75 @@ select option { padding: 8px; }
   .splash { padding: 24px 16px; }
   .splash h1 { font-size: clamp(20px, 6vw, 26px); }
   .mobile-nav a, .mobile-nav button { padding: 8px 2px 10px; font-size: 10px; }
+}
+
+.parc-tanks { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.parc-tanks.ouvert { grid-template-columns: minmax(280px, 380px) 1fr; align-items: start; }
+.tank-tiroir {
+  background: var(--white);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  animation: tank-glisse 0.38s ease;
+}
+@keyframes tank-glisse {
+  from { transform: translateX(-36px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.tank-tiroir-visuel { display: flex; justify-content: center; margin-bottom: 12px; }
+.tank-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.tank-stat { background: #f6f8fb; border-radius: 8px; padding: 10px 12px; }
+.tank-stat .k { font-size: 11px; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.05em; }
+.tank-stat .v { font-size: 16px; font-weight: 700; margin-top: 2px; }
+.parc-tanks-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.tank-carte {
+  appearance: none;
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px 10px 14px;
+  cursor: pointer;
+  text-align: center;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.tank-carte:hover { border-color: var(--navy-700); transform: translateY(-2px); }
+.tank-carte.active { border-color: var(--navy-800); box-shadow: 0 0 0 3px rgba(20, 40, 70, 0.12); }
+.tank-carte h3 { margin: 6px 0 2px; font-size: 15px; }
+.tank-carte p { margin: 0; font-size: 12px; color: var(--ink-500); }
+.tank-visuel { position: relative; display: flex; flex-direction: column; align-items: center; }
+.tank-visuel .tank-huile {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: transform 1.2s cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+.tank-visuel .tank-vague { animation: tank-vague 2.6s ease-in-out infinite; }
+@keyframes tank-vague {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-10px); }
+}
+.tank-visuel-pct {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--navy-800);
+}
+.tank-visuel.alerte .tank-visuel-pct { color: #b42318; }
+.parc-tanks-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .parc-tanks.ouvert { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 400px) {

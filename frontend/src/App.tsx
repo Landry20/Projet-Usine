@@ -15,9 +15,16 @@ import { DetailDemandePage, ListeDemandesPage, NouvelleDemandePage } from './pag
 import { FicheEquipementPage, ListeEquipementsPage, NouvelEquipementPage } from './pages/equipements/EquipementsPages';
 import { FicheOtPage, ListeOtPage, NouvelOtPage } from './pages/ordres-travail/OtPages';
 import {
-  ArrivagePage,
+  DemandesAchatPage,
+  DemandesDepotPage,
+  DashboardDepotPage,
+  LotsDepotPage,
+  MouvementsDepotPage,
+  ReceptionPage,
+  ZonesDepotPage,
+} from './pages/depot/DepotPages';
+import {
   DashboardProductionPage,
-  DepotPage,
   FicheOfPage,
   LignesPage,
   ListeOfPage,
@@ -83,6 +90,12 @@ export function App() {
           </Prive>
         }
       >
+        <Route path="/depot" element={<DashboardDepotPage />} />
+        <Route path="/depot/reception" element={<ReceptionPage />} />
+        <Route path="/depot/lots" element={<LotsDepotPage />} />
+        <Route path="/depot/zones" element={<ZonesDepotPage />} />
+        <Route path="/depot/mouvements" element={<MouvementsDepotPage />} />
+        <Route path="/depot/demandes" element={<DemandesDepotPage />} />
         <Route path="/production" element={<DashboardProductionPage />} />
         <Route path="/production/demandes-matiere" element={<DemandesMatierePage />} />
         <Route path="/production/journaux" element={<JournauxQuartPage />} />
@@ -91,8 +104,8 @@ export function App() {
         <Route path="/production/ordres/nouveau" element={<NouvelOfPage />} />
         <Route path="/production/ordres/:id" element={<FicheOfPage />} />
         <Route path="/production/matieres" element={<MatieresPage />} />
-        <Route path="/production/depot" element={<DepotPage />} />
-        <Route path="/production/arrivage" element={<ArrivagePage />} />
+        <Route path="/production/depot" element={<Navigate to="/depot/lots" replace />} />
+        <Route path="/production/arrivage" element={<Navigate to="/depot/reception" replace />} />
         <Route path="/production/nomenclatures" element={<NomenclaturesPage />} />
         <Route path="/production/lignes" element={<LignesPage />} />
         <Route path="/produits-finis" element={<DashboardPfPage />} />
@@ -109,6 +122,7 @@ export function App() {
         <Route path="/laboratoire/bulletins/:id" element={<FicheBulletinPage />} />
         <Route path="/laboratoire/non-conformites" element={<NonConformitesPage />} />
         <Route path="/direction" element={<DashboardDirectionPage />} />
+        <Route path="/direction/achats" element={<DemandesAchatPage />} />
         <Route path="/maintenance" element={<DashboardPage />} />
         <Route path="/equipements" element={<ListeEquipementsPage />} />
         <Route path="/equipements/nouveau" element={<NouvelEquipementPage />} />

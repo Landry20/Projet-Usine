@@ -21,6 +21,7 @@ import type {
   OrdreFabrication,
   Produit,
   ReponsePaginee,
+  Tank,
 } from '../../types';
 
 function Kpi({ label, value, hint, alert }: { label: string; value: number | string; hint?: string; alert?: boolean }) {
@@ -47,7 +48,7 @@ export function DashboardProductionPage() {
       <div className="page-head">
         <div>
           <h2>Bonjour {utilisateur?.prenom}</h2>
-          <p>Qu’est-ce que l’usine doit fabriquer, avec quelles matières, sur quelle ligne, et quand ?</p>
+          <p>Demandez la matière au dépôt, suivez les OF, versez le produit fini dans les tanks et signalez les pannes.</p>
         </div>
         <div className="page-head-actions">
           <BoutonRecherche />
@@ -319,9 +320,13 @@ export function FicheOfPage() {
   const [err, setErr] = useState('');
   const [motif, setMotif] = useState('');
   const [controle, setControle] = useState({ quantiteConforme: '', quantiteRejetee: '0', emplacement: '' });
+  const [tanks, setTanks] = useState<Tank[]>([]);
+  const [remplissage, setRemplissage] = useState({ tankId: '', volumeLitres: '' });
+  const [okTank, setOkTank] = useState('');
 
   function charger() {
     if (id) metier.of(Number(id)).then(setOf);
+    metier.tanks().then(setTanks).catch(() => setTanks([]));
   }
   useEffect(() => {
     charger();
@@ -416,6 +421,17 @@ export function FicheOfPage() {
             )}
           </p>
           <p>Conforme : {of.quantiteConforme} · Rejet : {of.quantiteRejetee}</p>
+          {Number(of.quantitePrevue) > 0 && (
+            <p>
+              Rendement d’extraction :{' '}
+              <strong>{((Number(of.quantiteConforme) / Number(of.quantitePrevue)) * 100).toFixed(2)} %</strong>
+              {' · '}
+              Perte :{' '}
+              <strong>
+                {(Number(of.quantitePrevue) - Number(of.quantiteConforme)).toFixed(3)} {of.produit?.unite ?? ''}
+              </strong>
+            </p>
+          )}
           {of.motifAttente && <p>Motif d’attente : {of.motifAttente}</p>}
           {of.nomenclature?.lignes && of.nomenclature.lignes.length > 0 && (
             <div className="table-wrap">
@@ -445,6 +461,55 @@ export function FicheOfPage() {
           )}
         </div>
       </div>
+      {aPermission('of.executer') && (of.statut === 'EN_COURS' || of.statut === 'CONTROLE') && (
+        <form
+          className="card"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setOkTank('');
+            run(async () => {
+              const tank = await metier.remplirTankOf(of.id, {
+                tankId: Number(remplissage.tankId),
+                volumeLitres: Number(remplissage.volumeLitres),
+              });
+              setOkTank(
+                `Tank ${tank.code} mis à jour : ${tank.stockLitres} L / ${tank.capaciteLitres} L.`,
+              );
+              setRemplissage({ ...remplissage, volumeLitres: '' });
+              return of;
+            });
+          }}
+        >
+          <div className="card-h">
+            <h3>Remplissage tank</h3>
+          </div>
+          <div className="card-b form-grid">
+            {okTank && <div className="alert alert-ok full">{okTank}</div>}
+            <Selecteur label="Tank de destination" value={remplissage.tankId} onChange={(e) => setRemplissage({ ...remplissage, tankId: e.target.value })}>
+              <option value="">—</option>
+              {tanks.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.code} — {t.stockLitres} / {t.capaciteLitres} L
+                </option>
+              ))}
+            </Selecteur>
+            <label className="field">
+              Volume versé (L)
+              <input
+                required
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={remplissage.volumeLitres}
+                onChange={(e) => setRemplissage({ ...remplissage, volumeLitres: e.target.value })}
+              />
+            </label>
+            <div className="full">
+              <button className="btn btn-primary">Verser dans le tank</button>
+            </div>
+          </div>
+        </form>
+      )}
       {aPermission('of.cloturer') && (of.statut === 'EN_COURS' || of.statut === 'CONTROLE') && (
         <form
           className="card"

@@ -16,7 +16,7 @@ export interface Utilisateur {
   siteId?: number | null;
   doitChangerMdp: boolean;
   permissions: string[];
-  compartiments?: Array<'PRODUCTION' | 'PRODUITS_FINIS' | 'LABORATOIRE' | 'MAINTENANCE' | 'DIRECTION'>;
+  compartiments?: Array<'DEPOT' | 'PRODUCTION' | 'PRODUITS_FINIS' | 'LABORATOIRE' | 'MAINTENANCE' | 'DIRECTION'>;
   actif?: boolean;
   derniereConnexion?: string | null;
   site?: { id: number; code: string; libelle: string } | null;
@@ -265,16 +265,29 @@ export interface Nomenclature {
   lignes?: NomenclatureLigne[];
 }
 
+export interface DepotZone {
+  id: number;
+  code: string;
+  libelle: string;
+  type: string;
+  siteId?: number | null;
+  actif: boolean;
+  site?: Site | null;
+}
+
 export interface LotDepot {
   id: number;
   numero: string;
   libelle: string;
   produitId: number;
+  depotId?: number | null;
   capacite?: string | null;
   quantite: string;
+  etat?: string;
   emplacement?: string | null;
   actif: boolean;
   produit?: Produit;
+  depot?: DepotZone | null;
 }
 
 export interface ArrivageMatiere {
@@ -283,12 +296,65 @@ export interface ArrivageMatiere {
   lotDepotId: number;
   produitId: number;
   quantite: string;
+  numeroCamion?: string | null;
+  poidsBrut?: string | null;
+  fournisseurNom?: string | null;
+  dateReception?: string | null;
   referenceBl?: string | null;
   commentaire?: string | null;
   dateArrivage: string;
   lotDepot?: LotDepot;
   produit?: Produit;
+  depot?: DepotZone | null;
+  fournisseur?: { id: number; code: string; raisonSociale: string } | null;
   utilisateur?: { id: number; nom: string; prenom?: string | null } | null;
+}
+
+export interface MouvementLotDepot {
+  id: string;
+  typeMvt: string;
+  quantite: string;
+  motif?: string | null;
+  dateMvt: string;
+  lotDepot?: LotDepot;
+  utilisateur?: { id: number; nom: string; prenom?: string | null } | null;
+}
+
+export interface DemandeAchat {
+  id: number;
+  numero: string;
+  type: string;
+  statut: string;
+  libelle: string;
+  quantite?: string | null;
+  motif?: string | null;
+  motifRejet?: string | null;
+  createdAt: string;
+  dateDecision?: string | null;
+  produit?: Produit | null;
+  demandeur?: { id: number; nom: string; prenom?: string | null } | null;
+}
+
+export interface DashboardDepot {
+  nbLots: number;
+  stockTotal: string;
+  demandesEnAttente: number;
+  alertes: Array<{
+    produitId: number;
+    refProduit: string;
+    designation: string;
+    unite: string;
+    quantiteStock: string;
+    seuilReappro: string;
+  }>;
+  parDepot: Array<{ depot: DepotZone; nbLots: number; quantite: string }>;
+  lots: LotDepot[];
+}
+
+export interface Fournisseur {
+  id: number;
+  code: string;
+  raisonSociale: string;
 }
 
 export interface LotProduit {
@@ -376,6 +442,7 @@ export interface DemandeMatiere {
   statut: string;
   produit?: Produit;
   ligne?: LigneProduction | null;
+  lotDepot?: LotDepot | null;
   demandeur?: UtilisateurMini | null;
   magasinier?: UtilisateurMini | null;
 }

@@ -15,6 +15,7 @@ import {
   ScanLine,
   Settings,
   UserRound,
+  Warehouse,
   Wrench,
   X,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useActualisation } from '../../hooks/useActualisation';
 import { useAuth } from '../../hooks/useAuth';
 import { ACCUEIL_COMPARTIMENT, COMPARTIMENTS, useCompartiment, type CodeCompartiment } from '../../hooks/useCompartiment';
+import { useUsine } from '../../hooks/useUsine';
 import { MENUS } from '../../lib/menus';
 import { LogoManuPro } from '../brand/LogoManuPro';
 import { InviteInstallation } from '../pwa/InviteInstallation';
@@ -34,6 +36,7 @@ function initiales(prenom?: string | null, nom?: string) {
 export function AppShell() {
   const { utilisateur, aPermission, deconnexion } = useAuth();
   const { actif, disponibles, setActif } = useCompartiment();
+  const { usineId } = useUsine();
   const { cleContenu, mode, actualiserGlobal } = useActualisation();
   const nav = useNavigate();
   const loc = useLocation();
@@ -145,6 +148,7 @@ export function AppShell() {
             {disponibles.length > 1 && <SelectCompartiment />}
           </div>
           <div className="topbar-actions">
+            <SelectUsine />
             {actif === 'MAINTENANCE' && (
               <NavLink to="/terrain/scan" className="btn btn-gold btn-scan">
                 <QrCode size={16} />
@@ -213,7 +217,7 @@ export function AppShell() {
           </div>
         </header>
         <div className={`content ${mode === 'contenu' ? 'content-refresh' : ''}`}>
-          <Outlet key={cleContenu} />
+          <Outlet key={`${cleContenu}-${usineId ?? 'all'}`} />
         </div>
       </div>
       <nav className="mobile-nav">
@@ -262,6 +266,25 @@ export function AppShell() {
               Menu
             </button>
           </>
+        ) : actif === 'DEPOT' ? (
+          <>
+            <NavLink to="/depot" end>
+              <LayoutDashboard size={18} />
+              Accueil
+            </NavLink>
+            <NavLink to="/depot/reception">
+              <Package size={18} />
+              Réception
+            </NavLink>
+            <NavLink to="/depot/lots">
+              <Warehouse size={18} />
+              Lots
+            </NavLink>
+            <button type="button" onClick={() => setTiroir(true)}>
+              <Menu size={18} />
+              Menu
+            </button>
+          </>
         ) : actif === 'PRODUCTION' ? (
           <>
             <NavLink to="/production" end>
@@ -303,11 +326,37 @@ export function AppShell() {
 }
 
 function iconeCompartiment(code: CodeCompartiment) {
+  if (code === 'DEPOT') return <Warehouse size={16} />;
   if (code === 'PRODUCTION') return <Factory size={16} />;
   if (code === 'PRODUITS_FINIS') return <Boxes size={16} />;
   if (code === 'LABORATOIRE') return <FlaskConical size={16} />;
   if (code === 'DIRECTION') return <LineChart size={16} />;
   return <Wrench size={16} />;
+}
+
+function SelectUsine() {
+  const { usineId, usines, setUsineId, peutChanger } = useUsine();
+  const actuelle = usines.find((u) => u.id === usineId);
+  if (!usines.length) return null;
+  if (!peutChanger) {
+    return actuelle ? <span className="usine-fixe">{actuelle.libelle}</span> : null;
+  }
+  return (
+    <label className="usine-select">
+      <Warehouse size={14} />
+      <select
+        value={usineId ?? ''}
+        onChange={(e) => setUsineId(e.target.value ? Number(e.target.value) : null)}
+      >
+        <option value="">Toutes les usines</option>
+        {usines.map((u) => (
+          <option key={u.id} value={u.id}>
+            {u.libelle}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
 }
 
 function SelectCompartiment() {
@@ -374,9 +423,14 @@ function titrePage(path: string) {
   if (path.startsWith('/production/demandes-matiere')) return 'Demandes de matière';
   if (path.startsWith('/production/journaux')) return 'Journaux de quart';
   if (path.startsWith('/production/ordres')) return 'Ordres de fabrication';
+  if (path.startsWith('/depot/reception')) return 'Réception MP';
+  if (path.startsWith('/depot/lots')) return 'Lots du dépôt';
+  if (path.startsWith('/depot/zones')) return 'Zones de dépôt';
+  if (path.startsWith('/depot/mouvements')) return 'Mouvements dépôt';
+  if (path.startsWith('/depot/demandes')) return 'Demandes production';
+  if (path.startsWith('/depot')) return 'Dépôts & matières premières';
   if (path.startsWith('/production/matieres')) return 'Matières premières';
-  if (path.startsWith('/production/depot')) return 'Dépôt';
-  if (path.startsWith('/production/arrivage')) return 'Arrivage';
+  if (path.startsWith('/direction/achats')) return 'Demandes d’achat';
   if (path.startsWith('/production/nomenclatures')) return 'Nomenclatures';
   if (path.startsWith('/production/lignes')) return 'Lignes de production';
   if (path.startsWith('/production')) return 'Gestion de production';

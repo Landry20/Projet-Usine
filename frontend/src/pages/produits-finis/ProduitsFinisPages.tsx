@@ -10,7 +10,9 @@ import { useAuth } from '../../hooks/useAuth';
 import { dateFr } from '../../lib/libelles';
 import { messageApi } from '../../lib/api';
 import { metier } from '../../services/metier.service';
-import type { DashboardPf, LotProduit, MouvementProduit, Produit, ReponsePaginee } from '../../types';
+import { TankVisuel } from '../../components/tanks/TankVisuel';
+import { Link } from 'react-router-dom';
+import type { DashboardPf, LotProduit, MouvementProduit, Produit, ReponsePaginee, Tank } from '../../types';
 
 function Kpi({ label, value, alert }: { label: string; value: number | string; alert?: boolean }) {
   return (
@@ -24,9 +26,11 @@ function Kpi({ label, value, alert }: { label: string; value: number | string; a
 export function DashboardPfPage() {
   const { utilisateur } = useAuth();
   const [d, setD] = useState<DashboardPf | null>(null);
+  const [tanks, setTanks] = useState<Tank[]>([]);
   const [err, setErr] = useState('');
   useEffect(() => {
     metier.dashboardPf().then(setD).catch(() => setErr('Impossible de charger le pilotage produits finis.'));
+    metier.tanks().then(setTanks).catch(() => setTanks([]));
   }, []);
   if (err) return <div className="alert alert-err">{err}</div>;
   if (!d) return <p>Chargement du tableau de bord…</p>;
@@ -68,6 +72,27 @@ export function DashboardPfPage() {
           titreActivite="Lots créés par mois"
           titreVolume="Quantités entrées en stock PF"
         />
+      )}
+      {tanks.length > 0 && (
+        <div className="card">
+          <div className="card-h">
+            <h3>Parc de tanks</h3>
+            <Link to="/produits-finis/tanks" className="btn btn-ghost">
+              Voir le détail
+            </Link>
+          </div>
+          <div className="card-b parc-tanks-mini">
+            {tanks.map((t) => (
+              <Link key={t.id} to="/produits-finis/tanks" className="tank-carte" style={{ textDecoration: 'none' }}>
+                <TankVisuel tank={t} taille="s" />
+                <h3>{t.code}</h3>
+                <p>
+                  {t.stockLitres} / {t.capaciteLitres} L
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

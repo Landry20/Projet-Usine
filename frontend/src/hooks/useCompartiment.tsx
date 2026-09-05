@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from './useAuth';
 
-export type CodeCompartiment = 'PRODUCTION' | 'PRODUITS_FINIS' | 'LABORATOIRE' | 'MAINTENANCE' | 'DIRECTION';
+export type CodeCompartiment = 'DEPOT' | 'PRODUCTION' | 'PRODUITS_FINIS' | 'LABORATOIRE' | 'MAINTENANCE' | 'DIRECTION';
 
 export const COMPARTIMENTS: { code: CodeCompartiment; label: string; kicker: string }[] = [
+  { code: 'DEPOT', label: 'Dépôts', kicker: 'Matières premières' },
   { code: 'PRODUCTION', label: 'Production', kicker: 'Bilan matière' },
   { code: 'PRODUITS_FINIS', label: 'Produit fini', kicker: 'Tanks & expéditions' },
   { code: 'LABORATOIRE', label: 'Laboratoire', kicker: 'Qualité' },
@@ -12,6 +13,7 @@ export const COMPARTIMENTS: { code: CodeCompartiment; label: string; kicker: str
 ];
 
 export const ACCUEIL_COMPARTIMENT: Record<CodeCompartiment, string> = {
+  DEPOT: '/depot',
   PRODUCTION: '/production',
   PRODUITS_FINIS: '/produits-finis',
   LABORATOIRE: '/laboratoire',

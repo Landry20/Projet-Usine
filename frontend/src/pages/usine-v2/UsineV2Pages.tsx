@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState, type ReactNode } from 'react';
-import { FlaskConical, Plus, Scale, TestTube, Warehouse } from 'lucide-react';
+import { FlaskConical, Plus, Scale, TestTube, Warehouse, X } from 'lucide-react';
+import { TankVisuel } from '../../components/tanks/TankVisuel';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '../../components/ui/Badge';
 import { BoutonActualiser } from '../../components/ui/BoutonActualiser';
@@ -19,6 +20,7 @@ import type {
   Expedition,
   JournalQuart,
   LigneProduction,
+  LotDepot,
   NonConformite,
   ParametreAnalyse,
   PointPrelevement,
@@ -49,7 +51,8 @@ export function DemandesMatierePage() {
   const [produits, setProduits] = useState<Produit[]>([]);
   const [lignes, setLignes] = useState<LigneProduction[]>([]);
   const [err, setErr] = useState('');
-  const [form, setForm] = useState({ produitId: '', quantiteDemandee: '', ligneId: '', quart: 'A' });
+  const [lots, setLots] = useState<LotDepot[]>([]);
+  const [form, setForm] = useState({ produitId: '', lotDepotId: '', quantiteDemandee: '', ligneId: '', quart: 'A' });
   const [service, setService] = useState<Record<number, { qte: string; motif: string }>>({});
 
   function charger() {
@@ -59,6 +62,7 @@ export function DemandesMatierePage() {
     charger();
     metier.produits({ type: 'MATIERE_PREMIERE', limite: 200 }).then((p) => setProduits(p.donnees));
     metier.lignesProduction().then(setLignes);
+    metier.lotsDepot().then(setLots).catch(() => setLots([]));
   }, []);
 
   async function creer(e: FormEvent) {
@@ -67,6 +71,7 @@ export function DemandesMatierePage() {
     try {
       await metier.creerDemandeMatiere({
         produitId: Number(form.produitId),
+        lotDepotId: form.lotDepotId ? Number(form.lotDepotId) : undefined,
         quantiteDemandee: Number(form.quantiteDemandee),
         ligneId: form.ligneId ? Number(form.ligneId) : undefined,
         quart: form.quart,
@@ -96,7 +101,7 @@ export function DemandesMatierePage() {
     <div>
       <Entete
         titre="Demandes de matière première"
-        texte="Le chef de quart demande. Le magasinier MP pèse et sert. L’écart exige un motif. Le stock baisse uniquement à ce moment (RG-31)."
+        texte="Le chef de ligne demande un lot au dépôt. Le magasinier sert : le stock du lot passe en transformation."
       />
       {err && <div className="alert alert-err">{err}</div>}
       {aPermission('quart.saisir') && (
@@ -108,7 +113,7 @@ export function DemandesMatierePage() {
             <Selecteur
               label="Matière"
               value={form.produitId}
-              onChange={(e) => setForm({ ...form, produitId: e.target.value })}
+              onChange={(e) => setForm({ ...form, produitId: e.target.value, lotDepotId: '' })}
             >
               <option value="">Choisir…</option>
               {produits.map((p) => (
@@ -116,6 +121,17 @@ export function DemandesMatierePage() {
                   {p.refProduit} — {p.designation} ({p.quantiteStock} {p.unite})
                 </option>
               ))}
+            </Selecteur>
+            <Selecteur label="Lot dépôt" value={form.lotDepotId} onChange={(e) => setForm({ ...form, lotDepotId: e.target.value })}>
+              <option value="">Premier lot disponible</option>
+              {lots
+                .filter((l) => !form.produitId || String(l.produitId) === form.produitId)
+                .filter((l) => Number(l.quantite) > 0)
+                .map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.numero} — {l.quantite} {l.produit?.unite ?? ''} ({l.depot?.libelle ?? 'dépôt'})
+                  </option>
+                ))}
             </Selecteur>
             <label className="field">
               Quantité (kg)
@@ -156,6 +172,7 @@ export function DemandesMatierePage() {
               <tr>
                 <th>N°</th>
                 <th>Matière</th>
+                <th>Lot</th>
                 <th>Demandée</th>
                 <th>Servie</th>
                 <th>Quart</th>
@@ -170,6 +187,7 @@ export function DemandesMatierePage() {
                   <td>
                     {d.produit?.refProduit} — {d.produit?.designation}
                   </td>
+                  <td className="mono">{d.lotDepot?.numero ?? '—'}</td>
                   <td>{d.quantiteDemandee}</td>
                   <td>{d.quantiteServie ?? '—'}</td>
                   <td>{d.quart ?? '—'}</td>
@@ -209,7 +227,7 @@ export function DemandesMatierePage() {
               ))}
               {!page?.donnees.length && (
                 <tr>
-                  <td colSpan={7} className="empty">
+                  <td colSpan={8} className="empty">
                     Aucune demande.
                   </td>
                 </tr>
@@ -539,15 +557,18 @@ export function FicheJournalPage() {
             }}
           >
             <div className="card-h">
-              <h3>Arrêt machine</h3>
+              <h3>Arrêt de ligne</h3>
             </div>
+            <p className="card-b" style={{ paddingBottom: 0 }}>
+              Une panne mécanique ou électrique crée automatiquement une demande d’intervention vers la Maintenance.
+            </p>
             <div className="card-b form-grid">
               <Selecteur label="Type" value={arret.typeArret} onChange={(e) => setArret({ ...arret, typeArret: e.target.value })}>
-                {['PANNE', 'REGLAGE', 'ENERGIE', 'MP', 'NETTOYAGE'].map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
+                <option value="PANNE">Panne méca / élec</option>
+                <option value="REGLAGE">Réglage</option>
+                <option value="ENERGIE">Énergie</option>
+                <option value="MP">Manque de matière</option>
+                <option value="NETTOYAGE">Nettoyage</option>
               </Selecteur>
               <label className="field">
                 Durée (min)
@@ -645,24 +666,41 @@ export function FicheJournalPage() {
 export function TanksPage() {
   const { aPermission } = useAuth();
   const [tanks, setTanks] = useState<Tank[]>([]);
+  const [choisi, setChoisi] = useState<Tank | null>(null);
   const [err, setErr] = useState('');
-  const [jauge, setJauge] = useState<Record<number, { h: string; ajuster: boolean }>>({});
+  const [jauge, setJauge] = useState({ h: '', ajuster: false });
 
   function charger() {
-    metier.tanks().then(setTanks);
+    metier.tanks().then((liste) => {
+      setTanks(liste);
+      setChoisi((actuel) => (actuel ? liste.find((t) => t.id === actuel.id) ?? actuel : actuel));
+    });
   }
   useEffect(() => {
     charger();
   }, []);
 
-  async function jauger(id: number) {
+  async function ouvrir(t: Tank) {
+    setJauge({ h: '', ajuster: false });
+    try {
+      const fiche = await metier.tank(t.id);
+      setChoisi({ ...t, ...fiche });
+    } catch {
+      setChoisi(t);
+    }
+  }
+
+  async function jauger() {
+    if (!choisi) return;
     setErr('');
     try {
-      await metier.jaugerTank(id, {
-        hauteurCm: Number(jauge[id]?.h),
-        ajusterStock: Boolean(jauge[id]?.ajuster),
+      await metier.jaugerTank(choisi.id, {
+        hauteurCm: Number(jauge.h),
+        ajusterStock: jauge.ajuster,
       });
       charger();
+      const fiche = await metier.tank(choisi.id);
+      setChoisi(fiche);
     } catch (ex) {
       setErr(messageApi(ex));
     }
@@ -671,55 +709,101 @@ export function TanksPage() {
   return (
     <div>
       <Entete
-        titre="Tanks et jaugeage"
-        texte="Le produit fini entre en tank depuis la production, se jauge, se réserve, puis sort au chargement."
+        titre="Parc de tanks"
+        texte="Cliquez un tank pour le voir en grand à gauche, avec le niveau d’huile et les statistiques."
       />
       {err && <div className="alert alert-err">{err}</div>}
-      <div className="landing-grid2">
-        {tanks.map((t) => (
-          <article key={t.id} className={`card ${t.alerteHaut || t.alerteBas ? 'warn' : ''}`}>
-            <div className="card-h">
-              <h3>
-                <Warehouse size={16} /> {t.code} — {t.libelle}
-              </h3>
+      <div className={`parc-tanks ${choisi ? 'ouvert' : ''}`}>
+        {choisi && (
+          <aside className="tank-tiroir">
+            <div className="page-head-actions" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
+              <strong>{choisi.code} — {choisi.libelle}</strong>
+              <button type="button" className="icon-btn" aria-label="Fermer" onClick={() => setChoisi(null)}>
+                <X size={16} />
+              </button>
             </div>
-            <div className="card-b">
-              <p>
-                Stock {t.stockLitres} L / {t.capaciteLitres} L ({t.remplissagePct} %) · {t.stockKg} kg
-              </p>
-              <p>
-                Produit : {t.produit?.designation ?? '—'} · <Badge valeur={t.statut} />
-              </p>
-              {aPermission('tank.gerer') && (
-                <div className="form-grid">
-                  <label className="field">
-                    Hauteur (cm)
-                    <input
-                      type="number"
-                      value={jauge[t.id]?.h ?? ''}
-                      onChange={(e) => setJauge({ ...jauge, [t.id]: { h: e.target.value, ajuster: jauge[t.id]?.ajuster ?? false } })}
-                    />
-                  </label>
-                  <label className="field">
-                    <input
-                      type="checkbox"
-                      checked={jauge[t.id]?.ajuster ?? false}
-                      onChange={(e) => setJauge({ ...jauge, [t.id]: { h: jauge[t.id]?.h ?? '', ajuster: e.target.checked } })}
-                    />{' '}
-                    Ajuster le stock
-                  </label>
-                  <div className="full">
-                    <button type="button" className="btn" onClick={() => jauger(t.id)}>
-                      Jaugeage
-                    </button>
-                  </div>
+            <div className="tank-tiroir-visuel">
+              <TankVisuel tank={choisi} taille="l" />
+            </div>
+            <p>
+              {choisi.produit?.designation ?? 'Aucun produit affecté'} · <Badge valeur={choisi.statut} />
+            </p>
+            <div className="tank-stats">
+              <div className="tank-stat">
+                <div className="k">Stock</div>
+                <div className="v">{choisi.stockLitres} L</div>
+              </div>
+              <div className="tank-stat">
+                <div className="k">Capacité</div>
+                <div className="v">{choisi.capaciteLitres} L</div>
+              </div>
+              <div className="tank-stat">
+                <div className="k">Masse</div>
+                <div className="v">{choisi.stockKg} kg</div>
+              </div>
+              <div className="tank-stat">
+                <div className="k">Disponible</div>
+                <div className="v">{choisi.disponibleLitres ?? choisi.stockLitres} L</div>
+              </div>
+              <div className="tank-stat">
+                <div className="k">Réservé</div>
+                <div className="v">{choisi.litresReserves} L</div>
+              </div>
+              <div className="tank-stat">
+                <div className="k">Remplissage</div>
+                <div className="v">{choisi.remplissagePct ?? 0} %</div>
+              </div>
+            </div>
+            {aPermission('tank.gerer') && (
+              <div className="form-grid">
+                <label className="field">
+                  Hauteur (cm)
+                  <input type="number" value={jauge.h} onChange={(e) => setJauge({ ...jauge, h: e.target.value })} />
+                </label>
+                <label className="field">
+                  <input type="checkbox" checked={jauge.ajuster} onChange={(e) => setJauge({ ...jauge, ajuster: e.target.checked })} />
+                  {' '}Ajuster le stock
+                </label>
+                <div className="full">
+                  <button type="button" className="btn" onClick={jauger}>
+                    Jaugeage
+                  </button>
                 </div>
-              )}
-            </div>
-          </article>
-        ))}
-        {!tanks.length && <p>Aucun tank. Relancez le seed pour TK-01 / TK-02.</p>}
+              </div>
+            )}
+            {(choisi.mouvements ?? []).length > 0 && (
+              <div style={{ marginTop: 14 }}>
+                <h3 style={{ fontSize: 14, margin: '0 0 8px' }}>Derniers mouvements</h3>
+                <ul>
+                  {choisi.mouvements!.slice(0, 6).map((m) => (
+                    <li key={m.id}>
+                      <Badge valeur={m.typeMvt} /> {m.quantiteLitres} L · {dateFr(m.dateMvt)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </aside>
+        )}
+        <div className="parc-tanks-grille">
+          {tanks.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`tank-carte ${choisi?.id === t.id ? 'active' : ''}`}
+              onClick={() => ouvrir(t)}
+            >
+              <TankVisuel tank={t} />
+              <h3>{t.code}</h3>
+              <p>{t.libelle}</p>
+              <p>
+                {t.stockLitres} / {t.capaciteLitres} L
+              </p>
+            </button>
+          ))}
+        </div>
       </div>
+      {!tanks.length && <p>Aucun tank. Relancez le seed pour TK-01 / TK-02.</p>}
     </div>
   );
 }

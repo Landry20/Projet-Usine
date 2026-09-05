@@ -19,6 +19,16 @@ import type { CodeCompartiment } from '../hooks/useCompartiment';
 export type LienMenu = { to: string; label: string; perm?: string; Icon: typeof LayoutDashboard; end?: boolean };
 
 export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme?: LienMenu[] }> = {
+  DEPOT: {
+    exploitation: [
+      { to: '/depot', label: 'Pilotage dépôt', Icon: LayoutDashboard, end: true },
+      { to: '/depot/reception', label: 'Réception MP', Icon: Truck },
+      { to: '/depot/lots', label: 'Lots & stock', Icon: Package },
+      { to: '/depot/zones', label: 'Zones de dépôt', Icon: Warehouse },
+      { to: '/depot/mouvements', label: 'Entrées / sorties', Icon: ClipboardList },
+      { to: '/depot/demandes', label: 'Demandes production', Icon: Factory },
+    ],
+  },
   PRODUCTION: {
     exploitation: [
       { to: '/production', label: 'Pilotage production', Icon: LayoutDashboard, end: true },
@@ -26,8 +36,6 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
       { to: '/production/journaux', label: 'Journaux de quart', Icon: ClipboardList },
       { to: '/production/ordres', label: 'Ordres de fabrication', Icon: Factory },
       { to: '/production/matieres', label: 'Matières premières', Icon: Package },
-      { to: '/production/depot', label: 'Dépôt', Icon: Warehouse },
-      { to: '/production/arrivage', label: 'Arrivage', Icon: Truck },
       { to: '/production/nomenclatures', label: 'Nomenclatures', Icon: ClipboardList },
       { to: '/production/lignes', label: 'Lignes / machines', Icon: Settings },
     ],
@@ -53,6 +61,7 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
   DIRECTION: {
     exploitation: [
       { to: '/direction', label: 'Vue consolidée', Icon: LineChart, end: true },
+      { to: '/direction/achats', label: 'Demandes d’achat', Icon: Package },
     ],
   },
   MAINTENANCE: {
