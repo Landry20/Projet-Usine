@@ -39,7 +39,8 @@ export default defineConfig({
             options: { cacheName: 'gmao-fonts', expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 } },
           },
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/v1/'),
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/v1/') || url.hostname === 'projet-usineapi.vercel.app',
             handler: 'NetworkFirst',
             options: { cacheName: 'gmao-api', networkTimeoutSeconds: 8 },
           },
