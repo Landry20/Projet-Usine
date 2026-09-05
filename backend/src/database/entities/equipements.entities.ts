@@ -151,7 +151,7 @@ export class Equipement {
   @Column({ type: 'text', name: 'photo_url', nullable: true })
   photoUrl: string | null;
 
-  /** JSON MySQL (équivalent JSONB Postgres) — caractéristiques variables par famille. */
+  /** JSONB Postgres — caractéristiques variables par famille. */
   @Column({ type: 'json', nullable: true })
   caracteristiques: Record<string, unknown> | null;
 
@@ -167,7 +167,7 @@ export class Equipement {
   @Column({ type: 'int', name: 'valide_par', nullable: true })
   validePar: number | null;
 
-  @Column({ type: 'datetime', name: 'date_validation', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_validation', nullable: true })
   dateValidation: Date | null;
 
   @Column({ type: 'char', length: 36, name: 'client_uuid', unique: true, nullable: true })

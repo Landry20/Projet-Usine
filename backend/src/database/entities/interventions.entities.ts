@@ -88,7 +88,7 @@ export class DemandeIntervention {
   @Column({ type: 'int', name: 'traite_par', nullable: true })
   traitePar: number | null;
 
-  @Column({ type: 'datetime', name: 'date_traitement', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_traitement', nullable: true })
   dateTraitement: Date | null;
 
   @Column({ type: 'char', length: 36, name: 'client_uuid', unique: true, nullable: true })
@@ -158,10 +158,10 @@ export class OrdreTravail {
   @Column({ type: 'decimal', precision: 6, scale: 2, name: 'duree_estimee_h', nullable: true })
   dureeEstimeeH: string | null;
 
-  @Column({ type: 'datetime', name: 'date_debut_reelle', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_debut_reelle', nullable: true })
   dateDebutReelle: Date | null;
 
-  @Column({ type: 'datetime', name: 'date_fin_reelle', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_fin_reelle', nullable: true })
   dateFinReelle: Date | null;
 
   @Column({ type: 'decimal', precision: 8, scale: 2, name: 'duree_arret_h', default: 0 })
@@ -213,7 +213,7 @@ export class OrdreTravail {
   @Column({ type: 'int', name: 'valide_par', nullable: true })
   validePar: number | null;
 
-  @Column({ type: 'datetime', name: 'date_cloture', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_cloture', nullable: true })
   dateCloture: Date | null;
 
   @Column({ type: 'int', name: 'cree_par', nullable: true })
@@ -231,10 +231,10 @@ export class OrdreTravail {
   @Column({ type: 'boolean', name: 'saisi_hors_ligne', default: false })
   saisiHorsLigne: boolean;
 
-  @Column({ type: 'datetime', name: 'date_saisie_terrain', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_saisie_terrain', nullable: true })
   dateSaisieTerrain: Date | null;
 
-  @Column({ type: 'datetime', name: 'date_synchronisation', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_synchronisation', nullable: true })
   dateSynchronisation: Date | null;
 
   @UpdateDateColumn({ name: 'updated_at' })
@@ -302,10 +302,10 @@ export class OtMainOeuvre {
   @Column({ type: 'char', length: 36, name: 'client_uuid', unique: true, nullable: true })
   clientUuid: string | null;
 
-  @Column({ type: 'datetime', name: 'date_saisie_terrain', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_saisie_terrain', nullable: true })
   dateSaisieTerrain: Date | null;
 
-  @Column({ type: 'datetime', name: 'date_synchronisation', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_synchronisation', nullable: true })
   dateSynchronisation: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
@@ -349,7 +349,7 @@ export class OtOperation {
   @Column({ type: 'int', name: 'realise_par', nullable: true })
   realisePar: number | null;
 
-  @Column({ type: 'datetime', name: 'realise_le', nullable: true })
+  @Column({ type: 'timestamptz', name: 'realise_le', nullable: true })
   realiseLe: Date | null;
 
   @Column({ type: 'boolean', default: true })
@@ -442,7 +442,7 @@ export class DemandePiece {
   @Column({ type: 'int', name: 'traite_par', nullable: true })
   traitePar: number | null;
 
-  @Column({ type: 'datetime', name: 'date_traitement', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_traitement', nullable: true })
   dateTraitement: Date | null;
 
   @Column({ type: 'text', name: 'motif_refus', nullable: true })
@@ -485,7 +485,7 @@ export class PieceJointe {
   @Column({ type: 'char', length: 36, name: 'client_uuid', unique: true, nullable: true })
   clientUuid: string | null;
 
-  @Column({ type: 'datetime', name: 'date_prise_vue', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_prise_vue', nullable: true })
   datePriseVue: Date | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })

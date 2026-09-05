@@ -160,7 +160,7 @@ export class MouvementStock {
   @Column({ type: 'decimal', precision: 16, scale: 2, default: 0 })
   montant: string;
 
-  @Column({ type: 'datetime', name: 'date_mvt' })
+  @Column({ type: 'timestamptz', name: 'date_mvt' })
   dateMvt: Date;
 
   @Column({ type: 'int', name: 'ot_id', nullable: true })

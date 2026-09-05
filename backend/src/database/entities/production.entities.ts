@@ -179,10 +179,10 @@ export class OrdreFabrication {
   @Column({ type: 'date', name: 'date_planifiee', nullable: true })
   datePlanifiee: string | null;
 
-  @Column({ type: 'datetime', name: 'date_debut', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_debut', nullable: true })
   dateDebut: Date | null;
 
-  @Column({ type: 'datetime', name: 'date_fin', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_fin', nullable: true })
   dateFin: Date | null;
 
   @Column({ type: 'text', name: 'motif_attente', nullable: true })

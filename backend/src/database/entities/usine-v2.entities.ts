@@ -56,10 +56,10 @@ export class JournalQuart {
   @JoinColumn({ name: 'chef_quart_id' })
   chefQuart: Utilisateur;
 
-  @Column({ type: 'datetime', name: 'heure_debut', nullable: true })
+  @Column({ type: 'timestamptz', name: 'heure_debut', nullable: true })
   heureDebut: Date | null;
 
-  @Column({ type: 'datetime', name: 'heure_fin', nullable: true })
+  @Column({ type: 'timestamptz', name: 'heure_fin', nullable: true })
   heureFin: Date | null;
 
   @Column({ type: 'decimal', precision: 6, scale: 2, name: 'heures_fonctionnement', nullable: true })
@@ -172,7 +172,7 @@ export class DemandeMatiere {
   @JoinColumn({ name: 'magasinier_id' })
   magasinier: Utilisateur | null;
 
-  @Column({ type: 'datetime', name: 'date_service', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_service', nullable: true })
   dateService: Date | null;
 
   @Column({ type: 'enum', enum: StatutDemandeMatiere, default: StatutDemandeMatiere.DEMANDEE })
@@ -283,7 +283,7 @@ export class JournalArret {
   @Column({ type: 'text', nullable: true })
   cause: string | null;
 
-  @Column({ type: 'datetime', name: 'heure_debut', nullable: true })
+  @Column({ type: 'timestamptz', name: 'heure_debut', nullable: true })
   heureDebut: Date | null;
 
   @Column({ type: 'int', name: 'duree_min' })
@@ -842,10 +842,10 @@ export class BulletinAnalyse {
   @Column({ type: 'int', name: 'approuve_par', nullable: true })
   approuvePar: number | null;
 
-  @Column({ type: 'datetime', name: 'date_saisie', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_saisie', nullable: true })
   dateSaisie: Date | null;
 
-  @Column({ type: 'datetime', name: 'date_approbation', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_approbation', nullable: true })
   dateApprobation: Date | null;
 
   @Column({ type: 'enum', enum: ConclusionBulletin, default: ConclusionBulletin.EN_COURS })
@@ -956,7 +956,7 @@ export class NonConformite {
   @CreateDateColumn({ name: 'date_ouverture' })
   dateOuverture: Date;
 
-  @Column({ type: 'datetime', name: 'date_cloture', nullable: true })
+  @Column({ type: 'timestamptz', name: 'date_cloture', nullable: true })
   dateCloture: Date | null;
 
   @Column({ type: 'enum', enum: StatutNc, default: StatutNc.OUVERTE })

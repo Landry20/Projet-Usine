@@ -109,7 +109,7 @@ export class Utilisateur {
   @Column({ type: 'boolean', name: 'mfa_actif', default: false })
   mfaActif: boolean;
 
-  @Column({ type: 'datetime', name: 'derniere_connexion', nullable: true })
+  @Column({ type: 'timestamptz', name: 'derniere_connexion', nullable: true })
   derniereConnexion: Date | null;
 
   /** CDC : changement obligatoire à la première connexion. */
@@ -120,7 +120,7 @@ export class Utilisateur {
   @Column({ type: 'int', name: 'tentatives_echec', default: 0 })
   tentativesEchec: number;
 
-  @Column({ type: 'datetime', name: 'bloque_jusqu_a', nullable: true })
+  @Column({ type: 'timestamptz', name: 'bloque_jusqu_a', nullable: true })
   bloqueJusqua: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
@@ -159,7 +159,7 @@ export class RefreshToken {
   @Column({ type: 'varchar', length: 255, nullable: true })
   userAgent: string | null;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamptz' })
   expireLe: Date;
 
   @Column({ type: 'boolean', default: false })
