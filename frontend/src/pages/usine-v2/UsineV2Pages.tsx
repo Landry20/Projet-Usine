@@ -410,7 +410,15 @@ export function FicheJournalPage() {
     }
   }
 
-  if (!j) return <p>Chargement du journalâ€¦</p>;
+  if (!j) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Journal de quart</h2>
+        </div>
+      </div>
+    );
+  }
   const saisissable = j.statut === 'BROUILLON' || j.statut === 'RETOURNE';
 
   return (
@@ -802,7 +810,15 @@ export function FicheExpeditionPage() {
     }
   }
 
-  if (!e) return <p>Chargementâ€¦</p>;
+  if (!e) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Expédition</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -915,19 +931,23 @@ export function FicheExpeditionPage() {
 }
 
 export function DashboardLaboPage() {
-  const [d, setD] = useState<DashboardLabo | null>(null);
+  const [d, setD] = useState<DashboardLabo>({
+    echantillons: 0,
+    bulletinsEnCours: 0,
+    tauxConformite: null,
+    ncOuvertes: 0,
+  });
   const [err, setErr] = useState('');
   useEffect(() => {
     metier.dashboardLabo().then(setD).catch(() => setErr('Impossible de charger le laboratoire.'));
   }, []);
-  if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargementâ€¦</p>;
   return (
     <div>
       <Entete
         titre="Laboratoire et qualitÃ©"
         texte="Un bulletin dâ€™analyse conditionne le dÃ©part dâ€™un conteneur. Sans bulletin conforme, lâ€™expÃ©dition ne se clÃ´ture pas (RG-39)."
       />
+      {err && <div className="alert alert-err">{err}</div>}
       <div className="kpis">
         <div className="kpi">
           <div className="label">Ã‰chantillons</div>
@@ -1074,7 +1094,15 @@ export function FicheEchantillonPage() {
     metier.parametresAnalyse().then(setParams);
   }, [id]);
 
-  if (!e) return <p>Chargementâ€¦</p>;
+  if (!e) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Échantillon</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -1233,7 +1261,15 @@ export function FicheBulletinPage() {
     }
   }
 
-  if (!b) return <p>Chargementâ€¦</p>;
+  if (!b) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Bulletin d’analyse</h2>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <Entete titre={b.numero} texte={b.echantillon?.produit?.designation ?? ''} extra={<FlaskConical size={18} />} />
@@ -1391,19 +1427,27 @@ export function NonConformitesPage() {
 }
 
 export function DashboardDirectionPage() {
-  const [d, setD] = useState<DashboardDirection | null>(null);
+  const [d, setD] = useState<DashboardDirection>({
+    rendementExtraction: null,
+    stockTanksKg: 0,
+    conformiteLabo: null,
+    disponibiliteMachines: null,
+    documentsEnAttente: 0,
+    journauxEnAttente: 0,
+    bulletinsEnAttente: 0,
+    ncOuvertes: 0,
+  });
   const [err, setErr] = useState('');
   useEffect(() => {
     metier.dashboardDirection().then(setD).catch(() => setErr('Impossible de charger le pilotage direction.'));
   }, []);
-  if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargementâ€¦</p>;
   return (
     <div>
       <Entete
         titre="Pilotage direction"
         texte="Vue consolidÃ©e : production, produit fini, laboratoire et maintenance. Calculs uniquement cÃ´tÃ© serveur."
       />
+      {err && <div className="alert alert-err">{err}</div>}
       <div className="kpis">
         <div className="kpi">
           <div className="label">Rendement extraction</div>

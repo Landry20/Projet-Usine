@@ -225,7 +225,15 @@ export function FicheOtPage() {
     }
   }
 
-  if (!ot) return <p>Chargement…</p>;
+  if (!ot) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Ordre de travail</h2>
+        </div>
+      </div>
+    );
+  }
   const clos = ot.statut === 'CLOTURE';
 
   return (

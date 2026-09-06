@@ -216,7 +216,15 @@ export function DetailDemandePage() {
     }
   }
 
-  if (!d) return <p>Chargement…</p>;
+  if (!d) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Demande d’intervention</h2>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="card">
       <div className="card-h">

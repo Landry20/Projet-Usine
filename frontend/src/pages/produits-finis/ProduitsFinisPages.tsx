@@ -25,15 +25,13 @@ function Kpi({ label, value, alert }: { label: string; value: number | string; a
 
 export function DashboardPfPage() {
   const { utilisateur } = useAuth();
-  const [d, setD] = useState<DashboardPf | null>(null);
+  const [d, setD] = useState<DashboardPf>({ lotsDisponibles: 0, lotsBloques: 0, stockPf: 0 });
   const [tanks, setTanks] = useState<Tank[]>([]);
   const [err, setErr] = useState('');
   useEffect(() => {
     metier.dashboardPf().then(setD).catch(() => setErr('Impossible de charger le pilotage produits finis.'));
     metier.tanks().then(setTanks).catch(() => setTanks([]));
   }, []);
-  if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargement du tableau de bord…</p>;
   return (
     <div>
       <div className="page-head">
@@ -60,6 +58,7 @@ export function DashboardPfPage() {
         />
         </div>
       </div>
+      {err && <div className="alert alert-err">{err}</div>}
       <div className="kpis">
         <Kpi label="Lots disponibles" value={d.lotsDisponibles} />
         <Kpi label="Lots bloqués" value={d.lotsBloques} alert={d.lotsBloques > 0} />

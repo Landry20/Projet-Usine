@@ -5,7 +5,6 @@ import { Bouton } from '../../components/ui/Bouton';
 import { ConfirmModale } from '../../components/ui/ConfirmModale';
 import { Modale } from '../../components/ui/Modale';
 import { Selecteur } from '../../components/ui/Selecteur';
-import { SquelettePage } from '../../components/ui/SquelettePage';
 import { COMPARTIMENTS, type CodeCompartiment } from '../../hooks/useCompartiment';
 import { useAuth } from '../../hooks/useAuth';
 import { useUsine } from '../../hooks/useUsine';
@@ -26,7 +25,7 @@ export function EmployesPage() {
   const { utilisateur } = useAuth();
   const { usineId, usines } = useUsine();
   const admin = utilisateur?.role?.code === 'ADMIN';
-  const [liste, setListe] = useState<Utilisateur[] | null>(null);
+  const [liste, setListe] = useState<Utilisateur[]>([]);
   const [roles, setRoles] = useState<RoleResume[]>([]);
   const [form, setForm] = useState(FORM_VIDE);
   const [modale, setModale] = useState<'creer' | 'modifier' | null>(null);
@@ -119,8 +118,6 @@ export function EmployesPage() {
       setBusy('');
     }
   }
-
-  if (!liste) return <SquelettePage />;
 
   return (
     <div className="page-fluide">

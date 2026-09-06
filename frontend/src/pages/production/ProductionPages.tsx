@@ -36,13 +36,16 @@ function Kpi({ label, value, hint, alert }: { label: string; value: number | str
 
 export function DashboardProductionPage() {
   const { utilisateur } = useAuth();
-  const [d, setD] = useState<DashboardProduction | null>(null);
+  const [d, setD] = useState<DashboardProduction>({
+    ofOuverts: 0,
+    ofAttente: 0,
+    ofEnCours: [],
+    nbMatieres: 0,
+  });
   const [err, setErr] = useState('');
   useEffect(() => {
     metier.dashboardProduction().then(setD).catch(() => setErr('Impossible de charger le pilotage production.'));
   }, []);
-  if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargement du tableau de bord…</p>;
   return (
     <div>
       <div className="page-head">
@@ -69,6 +72,7 @@ export function DashboardProductionPage() {
           </Link>
         </div>
       </div>
+      {err && <div className="alert alert-err">{err}</div>}
       <div className="kpis">
         <Kpi label="OF ouverts" value={d.ofOuverts} />
         <Kpi label="OF en attente" value={d.ofAttente} alert={d.ofAttente > 0} hint="Panne ou manque matière" />
@@ -341,7 +345,15 @@ export function FicheOfPage() {
     }
   }
 
-  if (!of) return <p>Chargement de l’ordre…</p>;
+  if (!of) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Ordre de fabrication</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

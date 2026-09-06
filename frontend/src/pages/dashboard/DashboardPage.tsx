@@ -13,15 +13,29 @@ import type { DashboardData } from '../../types';
 
 export function DashboardPage() {
   const { utilisateur } = useAuth();
-  const [d, setD] = useState<DashboardData | null>(null);
+  const [d, setD] = useState<DashboardData>({
+    role: '',
+    otOuverts: 0,
+    otRetard: 0,
+    demandesAttente: 0,
+    stockCritique: 0,
+    demandesPieces: 0,
+    interventionsDuJour: [],
+    coutMaintenance: 0,
+    ratioPreventif: 0,
+    valeurStock: 0,
+    tauxDisponibilite: 0,
+    mtbf: null,
+    mttr: 0,
+    nbEquipements: 0,
+    nbUtilisateurs: 0,
+    mesOt: [],
+  });
   const [err, setErr] = useState('');
 
   useEffect(() => {
     metier.dashboard().then(setD).catch(() => setErr('Impossible de charger les indicateurs serveur.'));
   }, []);
-
-  if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargement du tableau de bord…</p>;
 
   const role = utilisateur?.role?.code;
 
@@ -52,6 +66,7 @@ export function DashboardPage() {
         />
         </div>
       </div>
+      {err && <div className="alert alert-err">{err}</div>}
 
       <div className="kpis">
         {(role === 'RESP_MAINT' || role === 'ADMIN' || role === 'PLANIF') && (

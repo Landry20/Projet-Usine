@@ -108,7 +108,15 @@ export function FicheEquipementPage() {
   useEffect(() => {
     if (id) metier.equipement(Number(id)).then(setE);
   }, [id]);
-  if (!e) return <p>Chargement…</p>;
+  if (!e) {
+    return (
+      <div className="page-head">
+        <div>
+          <h2>Équipement</h2>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <div className="page-head">

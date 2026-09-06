@@ -6,7 +6,6 @@ import { messageApi } from '../../lib/api';
 import { metier } from '../../services/metier.service';
 import { Bouton } from '../ui/Bouton';
 import { ChampTexte } from '../ui/ChampTexte';
-import { SquelettePage } from '../ui/SquelettePage';
 
 export function PortailPremierSite({ children }: { children: ReactNode }) {
   const { utilisateur, rafraichirProfil } = useAuth();
@@ -34,7 +33,6 @@ export function PortailPremierSite({ children }: { children: ReactNode }) {
     }
   }
 
-  if (admin && !pret) return <SquelettePage />;
   if (!manqueSite) return <>{children}</>;
 
   return (

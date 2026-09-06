@@ -7,7 +7,6 @@ import { BoutonPdf } from '../../components/ui/BoutonPdf';
 import { ConfirmModale } from '../../components/ui/ConfirmModale';
 import { Modale } from '../../components/ui/Modale';
 import { Selecteur } from '../../components/ui/Selecteur';
-import { SquelettePage } from '../../components/ui/SquelettePage';
 import { useAuth } from '../../hooks/useAuth';
 import { imprimerEtiquetteLot } from '../../lib/etiquette-lot';
 import { dateFr } from '../../lib/libelles';
@@ -46,10 +45,19 @@ function peutGererDepot(aPermission: (c: string) => boolean) {
 }
 
 const ZONE_VIDE = { code: '', libelle: '', capaciteMaxLots: '4' };
+const PAGE_VIDE = { donnees: [] as DemandeMatiere[], page: 1, limite: 100, total: 0, pages: 0 };
+const DASH_VIDE: DashboardDepot = {
+  nbLots: 0,
+  stockTotal: '0',
+  demandesEnAttente: 0,
+  alertes: [],
+  parDepot: [],
+  lots: [],
+};
 
 export function DashboardDepotPage() {
   const { aPermission } = useAuth();
-  const [d, setD] = useState<DashboardDepot | null>(null);
+  const [d, setD] = useState<DashboardDepot>(DASH_VIDE);
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
 
@@ -71,8 +79,6 @@ export function DashboardDepotPage() {
       setErr(messageApi(ex));
     }
   }
-
-  if (!d) return err ? <div className="alert alert-err">{err}</div> : <SquelettePage />;
 
   return (
     <div className="page-fluide">
@@ -174,7 +180,7 @@ export function DashboardDepotPage() {
 export function ZonesDepotPage() {
   const { aPermission } = useAuth();
   const gerer = peutGererDepot(aPermission);
-  const [zones, setZones] = useState<DepotZone[] | null>(null);
+  const [zones, setZones] = useState<DepotZone[]>([]);
   const [form, setForm] = useState(ZONE_VIDE);
   const [modale, setModale] = useState<'creer' | 'modifier' | 'detail' | null>(null);
   const [choisi, setChoisi] = useState<DepotZone | null>(null);
@@ -253,8 +259,6 @@ export function ZonesDepotPage() {
       setBusy('');
     }
   }
-
-  if (!zones) return <SquelettePage cartes={1} />;
 
   return (
     <div className="page-fluide">
@@ -407,7 +411,7 @@ export function ZonesDepotPage() {
 export function MatieresDepotPage() {
   const { aPermission } = useAuth();
   const gerer = peutGererDepot(aPermission);
-  const [liste, setListe] = useState<Produit[] | null>(null);
+  const [liste, setListe] = useState<Produit[]>([]);
   const [form, setForm] = useState({ refProduit: '', designation: '', unite: 'kg', seuilReappro: '0' });
   const [modale, setModale] = useState<'creer' | 'modifier' | null>(null);
   const [choisi, setChoisi] = useState<Produit | null>(null);
@@ -473,7 +477,6 @@ export function MatieresDepotPage() {
     }
   }
 
-  if (!liste) return <SquelettePage cartes={1} />;
 
   return (
     <div className="page-fluide">
@@ -582,7 +585,7 @@ export function ReceptionPage() {
   const [zones, setZones] = useState<DepotZone[]>([]);
   const [mp, setMp] = useState<Produit[]>([]);
   const [fourns, setFourns] = useState<Fournisseur[]>([]);
-  const [arrivages, setArrivages] = useState<ArrivageMatiere[] | null>(null);
+  const [arrivages, setArrivages] = useState<ArrivageMatiere[]>([]);
   const [form, setForm] = useState({
     produitId: '',
     depotId: '',
@@ -635,7 +638,6 @@ export function ReceptionPage() {
     }
   }
 
-  if (!arrivages) return <SquelettePage />;
 
   return (
     <div className="page-fluide">
@@ -768,7 +770,7 @@ export function ReceptionPage() {
 
 export function LotsDepotPage() {
   const { aPermission } = useAuth();
-  const [lots, setLots] = useState<LotDepot[] | null>(null);
+  const [lots, setLots] = useState<LotDepot[]>([]);
   const [zones, setZones] = useState<DepotZone[]>([]);
   const [filtre, setFiltre] = useState<number | 'tous'>('tous');
   const [dest, setDest] = useState<Record<number, string>>({});
@@ -792,7 +794,6 @@ export function LotsDepotPage() {
     }
   }
 
-  if (!lots) return <SquelettePage />;
   const visibles = filtre === 'tous' ? lots : lots.filter((l) => l.depotId === filtre);
   const zoneFiltre = zones.find((z) => z.id === filtre);
 
@@ -887,7 +888,7 @@ export function LotsDepotPage() {
 export function DemandesMpPage() {
   const { aPermission } = useAuth();
   const [mp, setMp] = useState<Produit[]>([]);
-  const [liste, setListe] = useState<DemandeAchat[] | null>(null);
+  const [liste, setListe] = useState<DemandeAchat[]>([]);
   const [form, setForm] = useState({ produitId: '', quantite: '', motif: '' });
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
@@ -922,7 +923,6 @@ export function DemandesMpPage() {
     }
   }
 
-  if (!liste) return <SquelettePage />;
 
   return (
     <div className="page-fluide">
@@ -991,11 +991,10 @@ export function DemandesMpPage() {
 }
 
 export function MouvementsDepotPage() {
-  const [mvts, setMvts] = useState<MouvementLotDepot[] | null>(null);
+  const [mvts, setMvts] = useState<MouvementLotDepot[]>([]);
   useEffect(() => {
     metier.mouvementsLotsDepot().then(setMvts).catch(() => setMvts([]));
   }, []);
-  if (!mvts) return <SquelettePage cartes={1} />;
   return (
     <div className="page-fluide">
       <Entete titre="Entrées / sorties" texte="Historique des réceptions, sorties vers la production et transferts." />
@@ -1038,7 +1037,7 @@ export function MouvementsDepotPage() {
 
 export function DemandesDepotPage() {
   const { aPermission } = useAuth();
-  const [page, setPage] = useState<ReponsePaginee<DemandeMatiere> | null>(null);
+  const [page, setPage] = useState<ReponsePaginee<DemandeMatiere>>(PAGE_VIDE);
   const [service, setService] = useState<Record<number, { qte: string; motif: string }>>({});
   const [err, setErr] = useState('');
 
@@ -1062,8 +1061,6 @@ export function DemandesDepotPage() {
       setErr(messageApi(ex));
     }
   }
-
-  if (!page) return <SquelettePage cartes={1} />;
 
   return (
     <div className="page-fluide">
@@ -1136,7 +1133,7 @@ export function DemandesDepotPage() {
 export function DemandesAchatPage() {
   const { aPermission } = useAuth();
   const traiter = aPermission('achat.valider') || aPermission('direction.lire');
-  const [liste, setListe] = useState<DemandeAchat[] | null>(null);
+  const [liste, setListe] = useState<DemandeAchat[]>([]);
   const [fourns, setFourns] = useState<Fournisseur[]>([]);
   const [motif, setMotif] = useState<Record<number, string>>({});
   const [fournId, setFournId] = useState<Record<number, string>>({});
@@ -1210,7 +1207,6 @@ export function DemandesAchatPage() {
     }
   }
 
-  if (!liste) return <SquelettePage />;
 
   return (
     <div className="page-fluide">

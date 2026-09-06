@@ -27,7 +27,6 @@ import { MENUS } from '../../lib/menus';
 import { InviteInstallation } from '../pwa/InviteInstallation';
 import { LogoManuPro } from '../brand/LogoManuPro';
 import { Selecteur } from '../ui/Selecteur';
-import { SquelettePage } from '../ui/SquelettePage';
 import { metier } from '../../services/metier.service';
 import type { NotificationItem } from '../../types';
 
@@ -48,24 +47,12 @@ export function AppShell() {
 
   const [menuProfil, setMenuProfil] = useState(false);
   const [tiroir, setTiroir] = useState(false);
-  const [transition, setTransition] = useState(false);
   const profilRef = useRef<HTMLDivElement>(null);
-  const premier = useRef(true);
 
   useEffect(() => {
     setTiroir(false);
     setMenuProfil(false);
   }, [loc.pathname]);
-
-  useEffect(() => {
-    if (premier.current) {
-      premier.current = false;
-      return;
-    }
-    setTransition(true);
-    const t = window.setTimeout(() => setTransition(false), 480);
-    return () => window.clearTimeout(t);
-  }, [actif]);
 
   useEffect(() => {
     document.body.classList.toggle('no-scroll', tiroir);
@@ -208,7 +195,7 @@ export function AppShell() {
           </div>
         </header>
         <div className={`content ${mode === 'contenu' ? 'content-refresh' : ''}`}>
-          {transition ? <SquelettePage /> : <Outlet key={`${cleContenu}-${usineId ?? 'all'}`} />}
+          <Outlet key={`${cleContenu}-${usineId ?? 'all'}`} />
         </div>
       </div>
       <nav className="mobile-nav">
