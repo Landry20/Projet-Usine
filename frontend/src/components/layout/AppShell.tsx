@@ -9,6 +9,8 @@ import {
   LogOut,
   Menu,
   Package,
+  PanelLeftClose,
+  PanelLeftOpen,
   QrCode,
   RefreshCw,
   ScanLine,
@@ -47,7 +49,16 @@ export function AppShell() {
 
   const [menuProfil, setMenuProfil] = useState(false);
   const [tiroir, setTiroir] = useState(false);
+  const [reduit, setReduit] = useState(() => sessionStorage.getItem('gmao.menu-reduit') === '1');
   const profilRef = useRef<HTMLDivElement>(null);
+
+  function basculerMenu() {
+    setReduit((v) => {
+      const suivant = !v;
+      sessionStorage.setItem('gmao.menu-reduit', suivant ? '1' : '0');
+      return suivant;
+    });
+  }
 
   useEffect(() => {
     setTiroir(false);
@@ -78,11 +89,11 @@ export function AppShell() {
   return (
     <div className="app-shell">
       {tiroir && <button type="button" className="sidebar-backdrop" aria-label="Fermer le menu" onClick={() => setTiroir(false)} />}
-      <aside className={`sidebar ${tiroir ? 'open' : ''}`}>
+      <aside className={`sidebar ${tiroir ? 'open' : ''} ${reduit ? 'reduit' : ''}`}>
         <div className="brand">
           <div className="brand-row">
             <LogoManuPro className="brand-icon" />
-            <div>
+            <div className="brand-txt">
               <div className="brand-kicker">{COMPARTIMENTS.find((c) => c.code === actif)?.kicker}</div>
               <h1>ManuPro</h1>
             </div>
@@ -94,18 +105,18 @@ export function AppShell() {
         <nav className="nav">
           <div className="nav-group">Exploitation</div>
           {visibles(menu.exploitation).map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.end} onClick={() => setTiroir(false)}>
+            <NavLink key={l.to} to={l.to} end={l.end} title={l.label} onClick={() => setTiroir(false)}>
               <l.Icon size={17} strokeWidth={1.9} />
-              {l.label}
+              <span className="nav-label">{l.label}</span>
             </NavLink>
           ))}
           {visibles(MENUS.MAINTENANCE.systeme ?? []).length > 0 && (
             <>
               <div className="nav-group">Système</div>
               {visibles(MENUS.MAINTENANCE.systeme ?? []).map((l) => (
-                <NavLink key={l.to} to={l.to} onClick={() => setTiroir(false)}>
+                <NavLink key={l.to} to={l.to} title={l.label} onClick={() => setTiroir(false)}>
                   <l.Icon size={17} strokeWidth={1.9} />
-                  {l.label}
+                  <span className="nav-label">{l.label}</span>
                 </NavLink>
               ))}
             </>
@@ -114,6 +125,15 @@ export function AppShell() {
         <div className="sidebar-install">
           <InviteInstallation />
         </div>
+        <button
+          type="button"
+          className="btn-reduire"
+          title={reduit ? 'Agrandir le menu' : 'Réduire le menu'}
+          aria-label={reduit ? 'Agrandir le menu' : 'Réduire le menu'}
+          onClick={basculerMenu}
+        >
+          {reduit ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
       </aside>
       <div className="main">
         <header className="topbar">
