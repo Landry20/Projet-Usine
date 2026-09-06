@@ -271,8 +271,13 @@ export interface DepotZone {
   libelle: string;
   type: string;
   siteId?: number | null;
+  capaciteMaxLots?: number | null;
+  nbLotsOccupes?: number;
+  nbPalettes?: number;
+  placesLibres?: number | null;
   actif: boolean;
   site?: Site | null;
+  lots?: LotDepot[];
 }
 
 export interface LotDepot {
@@ -333,6 +338,9 @@ export interface DemandeAchat {
   dateDecision?: string | null;
   produit?: Produit | null;
   demandeur?: { id: number; nom: string; prenom?: string | null } | null;
+  fournisseur?: Fournisseur | null;
+  emailEnvoye?: boolean;
+  emailErreur?: string | null;
 }
 
 export interface DashboardDepot {
@@ -355,6 +363,8 @@ export interface Fournisseur {
   id: number;
   code: string;
   raisonSociale: string;
+  email?: string | null;
+  telephone?: string | null;
 }
 
 export interface LotProduit {

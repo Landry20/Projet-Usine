@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge';
 import { Bouton } from '../../components/ui/Bouton';
+import { ConfirmModale } from '../../components/ui/ConfirmModale';
 import { Modale } from '../../components/ui/Modale';
 import { Selecteur } from '../../components/ui/Selecteur';
 import { TankVisuel } from '../../components/tanks/TankVisuel';
@@ -33,6 +34,7 @@ export function TanksPage() {
   const [jauge, setJauge] = useState({ h: '', volume: '', ajuster: true });
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState<'sauver' | 'jauger' | 'supprimer' | ''>('');
+  const [aSupprimer, setASupprimer] = useState<Tank | null>(null);
 
   function charger() {
     metier.tanks().then(setTanks);
@@ -101,12 +103,12 @@ export function TanksPage() {
   }
 
   async function supprimer(t: Tank) {
-    if (!window.confirm(`Supprimer le tank ${t.code} ?`)) return;
     setBusy('supprimer');
     setErr('');
     try {
       await metier.supprimerTank(t.id);
       if (choisi?.id === t.id) setChoisi(null);
+      setASupprimer(null);
       charger();
     } catch (ex) {
       setErr(messageApi(ex));
@@ -170,7 +172,7 @@ export function TanksPage() {
                 <Bouton variante="ghost" onClick={() => { setChoisi(t); ouvrirForm('modifier', t); }}>
                   <Pencil size={14} /> Modifier
                 </Bouton>
-                <Bouton variante="danger" chargement={busy === 'supprimer'} onClick={() => supprimer(t)}>
+                <Bouton variante="danger" onClick={() => setASupprimer(t)}>
                   <Trash2 size={14} /> Supprimer
                 </Bouton>
               </div>
@@ -193,7 +195,7 @@ export function TanksPage() {
                   <Bouton variante="ghost" onClick={() => ouvrirForm('modifier', choisi)}>
                     <Pencil size={15} /> Modifier
                   </Bouton>
-                  <Bouton variante="danger" chargement={busy === 'supprimer'} onClick={() => supprimer(choisi)}>
+                  <Bouton variante="danger" onClick={() => setASupprimer(choisi)}>
                     <Trash2 size={15} /> Supprimer
                   </Bouton>
                 </>
@@ -335,6 +337,14 @@ export function TanksPage() {
             </div>
           </form>
         </Modale>
+      )}
+      {aSupprimer && (
+        <ConfirmModale
+          texte={`Supprimer le tank ${aSupprimer.code} ? Cette action est irréversible.`}
+          chargement={busy === 'supprimer'}
+          onAnnuler={() => setASupprimer(null)}
+          onConfirmer={() => supprimer(aSupprimer)}
+        />
       )}
     </div>
   );

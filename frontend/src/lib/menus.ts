@@ -22,9 +22,11 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
   DEPOT: {
     exploitation: [
       { to: '/depot', label: 'Pilotage dépôt', Icon: LayoutDashboard, end: true },
-      { to: '/depot/reception', label: 'Réception MP', Icon: Truck },
-      { to: '/depot/lots', label: 'Lots & stock', Icon: Package },
       { to: '/depot/zones', label: 'Zones de dépôt', Icon: Warehouse },
+      { to: '/depot/matieres', label: 'Matières premières', Icon: Package },
+      { to: '/depot/reception', label: 'Réception MP', Icon: Truck },
+      { to: '/depot/lots', label: 'Lots & palettes', Icon: Package },
+      { to: '/depot/demandes-mp', label: 'Demande matière première', Icon: ClipboardList },
       { to: '/depot/mouvements', label: 'Entrées / sorties', Icon: ClipboardList },
       { to: '/depot/demandes', label: 'Demandes production', Icon: Factory },
     ],
@@ -61,7 +63,7 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
   DIRECTION: {
     exploitation: [
       { to: '/direction', label: 'Vue consolidée', Icon: LineChart, end: true },
-      { to: '/direction/achats', label: 'Demandes d’achat', Icon: Package },
+      { to: '/direction/achats', label: 'Demandes MP / commandes', Icon: Package },
     ],
   },
   MAINTENANCE: {

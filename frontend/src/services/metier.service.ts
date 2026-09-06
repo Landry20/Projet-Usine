@@ -52,6 +52,8 @@ export const metier = {
   causes: () => api.get('/causes').then((r) => r.data),
   categories: () => api.get('/categories-articles').then((r) => r.data),
   fournisseurs: () => api.get<Fournisseur[]>('/fournisseurs').then((r) => r.data),
+  creerFournisseur: (payload: Record<string, unknown>) =>
+    api.post<Fournisseur>('/fournisseurs', payload).then((r) => r.data),
   parametres: () => api.get('/parametres').then((r) => r.data),
 
   equipements: (params?: Record<string, unknown>) =>
@@ -114,6 +116,9 @@ export const metier = {
   produits: (params?: Record<string, unknown>) =>
     api.get<ReponsePaginee<Produit>>('/produits', { params }).then((r) => r.data),
   creerProduit: (payload: Record<string, unknown>) => api.post<Produit>('/produits', payload).then((r) => r.data),
+  modifierProduit: (id: number, payload: Record<string, unknown>) =>
+    api.patch<Produit>(`/produits/${id}`, payload).then((r) => r.data),
+  supprimerProduit: (id: number) => api.delete(`/produits/${id}`).then((r) => r.data),
   lignesProduction: () => api.get<LigneProduction[]>('/lignes-production').then((r) => r.data),
   creerLigneProduction: (payload: Record<string, unknown>) =>
     api.post<LigneProduction>('/lignes-production', payload).then((r) => r.data),
@@ -143,7 +148,11 @@ export const metier = {
   creerArrivage: (payload: Record<string, unknown>) =>
     api.post<ArrivageMatiere>('/arrivages', payload).then((r) => r.data),
   depots: () => api.get<DepotZone[]>('/depots').then((r) => r.data),
+  depot: (id: number) => api.get<DepotZone>(`/depots/${id}`).then((r) => r.data),
   creerDepot: (payload: Record<string, unknown>) => api.post<DepotZone>('/depots', payload).then((r) => r.data),
+  modifierDepot: (id: number, payload: Record<string, unknown>) =>
+    api.patch<DepotZone>(`/depots/${id}`, payload).then((r) => r.data),
+  supprimerDepot: (id: number) => api.delete(`/depots/${id}`).then((r) => r.data),
   dashboardDepot: () => api.get<DashboardDepot>('/dashboard/depot').then((r) => r.data),
   transfererLotDepot: (id: number, payload: Record<string, unknown>) =>
     api.post<LotDepot>(`/lots-depot/${id}/transfert`, payload).then((r) => r.data),
@@ -154,6 +163,8 @@ export const metier = {
   validerDemandeAchat: (id: number) => api.post<DemandeAchat>(`/demandes-achat/${id}/valider`).then((r) => r.data),
   rejeterDemandeAchat: (id: number, motif: string) =>
     api.post<DemandeAchat>(`/demandes-achat/${id}/rejeter`, { motif }).then((r) => r.data),
+  commanderDemandeAchat: (id: number, fournisseurId: number) =>
+    api.post<DemandeAchat>(`/demandes-achat/${id}/commander`, { fournisseurId }).then((r) => r.data),
 
   demandesMatiere: (params?: Record<string, unknown>) =>
     api.get<ReponsePaginee<DemandeMatiere>>('/demandes-matiere', { params }).then((r) => r.data),

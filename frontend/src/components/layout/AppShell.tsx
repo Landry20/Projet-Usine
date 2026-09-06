@@ -26,6 +26,7 @@ import { ACCUEIL_COMPARTIMENT, COMPARTIMENTS, useCompartiment, type CodeComparti
 import { useUsine } from '../../hooks/useUsine';
 import { MENUS } from '../../lib/menus';
 import { InviteInstallation } from '../pwa/InviteInstallation';
+import { SquelettePage } from '../ui/SquelettePage';
 
 function initiales(prenom?: string | null, nom?: string) {
   return `${(prenom ?? '').charAt(0)}${(nom ?? '').charAt(0)}`.toUpperCase() || 'U';
@@ -44,12 +45,24 @@ export function AppShell() {
 
   const [menuProfil, setMenuProfil] = useState(false);
   const [tiroir, setTiroir] = useState(false);
+  const [transition, setTransition] = useState(false);
   const profilRef = useRef<HTMLDivElement>(null);
+  const premier = useRef(true);
 
   useEffect(() => {
     setTiroir(false);
     setMenuProfil(false);
   }, [loc.pathname]);
+
+  useEffect(() => {
+    if (premier.current) {
+      premier.current = false;
+      return;
+    }
+    setTransition(true);
+    const t = window.setTimeout(() => setTransition(false), 480);
+    return () => window.clearTimeout(t);
+  }, [actif]);
 
   useEffect(() => {
     document.body.classList.toggle('no-scroll', tiroir);
@@ -208,7 +221,7 @@ export function AppShell() {
           </div>
         </header>
         <div className={`content ${mode === 'contenu' ? 'content-refresh' : ''}`}>
-          <Outlet key={`${cleContenu}-${usineId ?? 'all'}`} />
+          {transition ? <SquelettePage /> : <Outlet key={`${cleContenu}-${usineId ?? 'all'}`} />}
         </div>
       </div>
       <nav className="mobile-nav">
@@ -415,13 +428,15 @@ function titrePage(path: string) {
   if (path.startsWith('/production/journaux')) return 'Journaux de quart';
   if (path.startsWith('/production/ordres')) return 'Ordres de fabrication';
   if (path.startsWith('/depot/reception')) return 'Réception MP';
-  if (path.startsWith('/depot/lots')) return 'Lots du dépôt';
+  if (path.startsWith('/depot/lots')) return 'Lots & palettes';
   if (path.startsWith('/depot/zones')) return 'Zones de dépôt';
+  if (path.startsWith('/depot/matieres')) return 'Matières premières';
+  if (path.startsWith('/depot/demandes-mp')) return 'Demande matière première';
   if (path.startsWith('/depot/mouvements')) return 'Mouvements dépôt';
   if (path.startsWith('/depot/demandes')) return 'Demandes production';
   if (path.startsWith('/depot')) return 'Dépôts & matières premières';
   if (path.startsWith('/production/matieres')) return 'Matières premières';
-  if (path.startsWith('/direction/achats')) return 'Demandes d’achat';
+  if (path.startsWith('/direction/achats')) return 'Demandes MP / commandes';
   if (path.startsWith('/production/nomenclatures')) return 'Nomenclatures';
   if (path.startsWith('/production/lignes')) return 'Lignes de production';
   if (path.startsWith('/production')) return 'Gestion de production';

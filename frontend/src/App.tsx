@@ -17,8 +17,10 @@ import { FicheOtPage, ListeOtPage, NouvelOtPage } from './pages/ordres-travail/O
 import {
   DemandesAchatPage,
   DemandesDepotPage,
+  DemandesMpPage,
   DashboardDepotPage,
   LotsDepotPage,
+  MatieresDepotPage,
   MouvementsDepotPage,
   ReceptionPage,
   ZonesDepotPage,
@@ -91,9 +93,11 @@ export function App() {
         }
       >
         <Route path="/depot" element={<DashboardDepotPage />} />
+        <Route path="/depot/zones" element={<ZonesDepotPage />} />
+        <Route path="/depot/matieres" element={<MatieresDepotPage />} />
         <Route path="/depot/reception" element={<ReceptionPage />} />
         <Route path="/depot/lots" element={<LotsDepotPage />} />
-        <Route path="/depot/zones" element={<ZonesDepotPage />} />
+        <Route path="/depot/demandes-mp" element={<DemandesMpPage />} />
         <Route path="/depot/mouvements" element={<MouvementsDepotPage />} />
         <Route path="/depot/demandes" element={<DemandesDepotPage />} />
         <Route path="/production" element={<DashboardProductionPage />} />

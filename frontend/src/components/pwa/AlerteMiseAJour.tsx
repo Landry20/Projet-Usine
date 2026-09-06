@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { registerSW } from 'virtual:pwa-register';
 import { LogoManuPro } from '../brand/LogoManuPro';
+import { Bouton } from '../ui/Bouton';
 
-/**
- * Popup quand une nouvelle version de l’application est disponible (PWA / cache).
- */
 export function AlerteMiseAJour() {
   const [visible, setVisible] = useState(false);
   const [appliquer, setAppliquer] = useState<(() => void) | null>(null);
+  const [pct, setPct] = useState(0);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const update = registerSW({
@@ -20,6 +20,23 @@ export function AlerteMiseAJour() {
     });
   }, []);
 
+  function lancer() {
+    if (busy) return;
+    setBusy(true);
+    setPct(1);
+    const debut = Date.now();
+    const duree = 1600;
+    const id = window.setInterval(() => {
+      const p = Math.min(100, Math.round(((Date.now() - debut) / duree) * 100));
+      setPct(Math.max(1, p));
+      if (p >= 100) {
+        window.clearInterval(id);
+        appliquer?.();
+        window.location.reload();
+      }
+    }, 30);
+  }
+
   if (!visible) return null;
 
   return (
@@ -27,22 +44,21 @@ export function AlerteMiseAJour() {
       <div className="maj-carte">
         <LogoManuPro className="maj-logo" />
         <h2 id="maj-titre">Nouvelle version disponible</h2>
-        <p>ManuPro a été mise à jour. Rechargez pour obtenir les dernières fonctionnalités et corrections.</p>
+        <p>ManuPro a été mise à jour. Rechargez pour obtenir les dernières fonctionnalités.</p>
+        {busy && (
+          <div className="maj-progress" aria-live="polite">
+            <div className="maj-progress-bar" style={{ width: `${pct}%` }} />
+            <strong>{pct} %</strong>
+          </div>
+        )}
         <div className="maj-actions">
-          <button type="button" className="btn btn-ghost" onClick={() => setVisible(false)}>
+          <Bouton variante="ghost" disabled={busy} onClick={() => setVisible(false)}>
             Plus tard
-          </button>
-          <button
-            type="button"
-            className="btn btn-gold"
-            onClick={() => {
-              appliquer?.();
-              window.location.reload();
-            }}
-          >
+          </Bouton>
+          <Bouton variante="gold" chargement={busy} onClick={lancer}>
             <RefreshCw size={16} />
             Mettre à jour
-          </button>
+          </Bouton>
         </div>
       </div>
     </div>

@@ -64,6 +64,12 @@ button, a.btn, .icon-btn, .profil-btn, .mobile-nav a, .mobile-nav button {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+.btn, .icon-btn, .pli-btn, .zone-slider button {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.btn:active, .icon-btn:active, .pli-btn:active, .zone-slider button:active {
+  transform: scale(0.96);
+}
 a { color: inherit; }
 code, .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 
@@ -903,4 +909,62 @@ span.btn-spinner {
   .topbar-actions .icon-btn { width: 40px; height: 40px; }
   .compartiment-switch { padding: 2px; }
   .compartiment-switch button { min-width: 40px; padding: 6px 8px; }
+}
+
+.page-fluide > * {
+  animation: apparaitre 0.42s ease both;
+}
+.page-fluide > *:nth-child(1) { animation-delay: 0.02s; }
+.page-fluide > *:nth-child(2) { animation-delay: 0.07s; }
+.page-fluide > *:nth-child(3) { animation-delay: 0.12s; }
+.page-fluide > *:nth-child(4) { animation-delay: 0.17s; }
+.page-fluide > *:nth-child(5) { animation-delay: 0.22s; }
+@keyframes apparaitre {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.squelette-page { display: flex; flex-direction: column; gap: 14px; }
+.squelette {
+  background: linear-gradient(90deg, #e4eaf1 0%, #f4f7fb 45%, #e4eaf1 90%);
+  background-size: 220% 100%;
+  animation: shimmer 1.15s ease-in-out infinite;
+  border-radius: 10px;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.squelette-titre { height: 28px; width: 42%; }
+.squelette-ligne { height: 14px; width: 68%; }
+.squelette-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.squelette-kpi { height: 86px; }
+.squelette-carte { height: 160px; }
+.pli-btn {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; background: transparent; border: 0; cursor: pointer; font-weight: 650;
+}
+.pli-btn span { display: inline-flex; align-items: center; gap: 8px; }
+.pli-btn svg:last-child { transition: transform 0.2s ease; }
+.pli-btn.open svg:last-child { transform: rotate(180deg); }
+.zone-slider {
+  display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 12px;
+  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+}
+.zone-slider button {
+  flex: 0 0 auto; scroll-snap-align: start;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 10px 14px; border-radius: 12px; border: 1px solid var(--ink-200);
+  background: var(--white); cursor: pointer; min-width: 140px; text-align: left;
+}
+.zone-slider button span { font-size: 12px; color: var(--ink-500); }
+.zone-slider button.active { border-color: var(--navy-700); background: #eef3f8; }
+.maj-progress { margin: 12px 0 4px; }
+.maj-progress-bar {
+  height: 8px; border-radius: 99px; background: var(--gold-500);
+  transition: width 0.08s linear;
+}
+.maj-progress strong { display: block; margin-top: 8px; font-size: 22px; }
+
+@media (max-width: 700px) {
+  .squelette-kpis { grid-template-columns: 1fr 1fr; }
 }
