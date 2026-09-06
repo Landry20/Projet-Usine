@@ -56,6 +56,8 @@ export const metier = {
   fournisseurs: () => api.get<Fournisseur[]>('/fournisseurs').then((r) => r.data),
   creerFournisseur: (payload: Record<string, unknown>) =>
     api.post<Fournisseur>('/fournisseurs', payload).then((r) => r.data),
+  modifierFournisseur: (id: number, payload: Record<string, unknown>) =>
+    api.patch<Fournisseur>(`/fournisseurs/${id}`, payload).then((r) => r.data),
   parametres: () => api.get('/parametres').then((r) => r.data),
 
   equipements: (params?: Record<string, unknown>) =>

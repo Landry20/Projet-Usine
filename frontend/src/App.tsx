@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { PortailPremierSite } from './components/layout/PortailPremierSite';
+import { FournisseursPage } from './pages/direction/FournisseursPage';
 import { EmployesPage } from './pages/employes/EmployesPage';
 import { PageChargement } from './components/ui/PageChargement';
 import { useAuth } from './hooks/useAuth';
@@ -131,6 +132,7 @@ export function App() {
         <Route path="/laboratoire/non-conformites" element={<NonConformitesPage />} />
         <Route path="/direction" element={<DashboardDirectionPage />} />
         <Route path="/direction/achats" element={<DemandesAchatPage />} />
+        <Route path="/direction/fournisseurs" element={<FournisseursPage />} />
         <Route path="/maintenance" element={<DashboardPage />} />
         <Route path="/equipements" element={<ListeEquipementsPage />} />
         <Route path="/equipements/nouveau" element={<NouvelEquipementPage />} />

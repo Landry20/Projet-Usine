@@ -63,14 +63,15 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
   DIRECTION: {
     exploitation: [
       { to: '/direction', label: 'Vue consolidée', Icon: LineChart, end: true },
-      { to: '/direction/achats', label: 'Demandes MP / commandes', Icon: Package },
+      { to: '/direction/achats', label: 'Demandes de matières premières / commandes', Icon: Package },
+      { to: '/direction/fournisseurs', label: 'Fournisseurs', Icon: Truck },
       { to: '/employes', label: 'Employés', perm: 'direction.lire', Icon: Users },
     ],
   },
   MAINTENANCE: {
     exploitation: [
       { to: '/maintenance', label: 'Pilotage maintenance', Icon: LayoutDashboard, end: true },
-      { to: '/demandes', label: 'Demandes', perm: 'demande.lire', Icon: ClipboardList },
+      { to: '/demandes', label: 'Demandes d’intervention', perm: 'demande.lire', Icon: ClipboardList },
       { to: '/ordres-travail', label: 'Ordres de travail', perm: 'ot.lire', Icon: Wrench },
       { to: '/equipements', label: 'Équipements', perm: 'equipement.lire', Icon: Settings },
       { to: '/stock', label: 'Stock pièces', perm: 'stock.lire', Icon: Warehouse },

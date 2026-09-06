@@ -227,11 +227,11 @@ export function AppShell() {
             </NavLink>
             <NavLink to="/ordres-travail">
               <Wrench size={18} />
-              OT
+              Ordres
             </NavLink>
             <NavLink to="/terrain/scan">
               <ScanLine size={18} />
-              QR
+              Scanner
             </NavLink>
             <button type="button" onClick={() => setTiroir(true)}>
               <Menu size={18} />
@@ -291,7 +291,7 @@ export function AppShell() {
             </NavLink>
             <NavLink to="/production/ordres">
               <Factory size={18} />
-              OF
+              Ordres
             </NavLink>
             <NavLink to="/production/matieres">
               <Package size={18} />
@@ -472,7 +472,8 @@ function titrePage(path: string) {
   if (path.startsWith('/production/demandes-matiere')) return 'Demandes de matière';
   if (path.startsWith('/production/journaux')) return 'Journaux de quart';
   if (path.startsWith('/production/ordres')) return 'Ordres de fabrication';
-  if (path.startsWith('/depot/reception')) return 'Réception MP';
+  if (path.startsWith('/direction/fournisseurs')) return 'Fournisseurs';
+  if (path.startsWith('/depot/reception')) return 'Réception matières premières';
   if (path.startsWith('/depot/lots')) return 'Lots & palettes';
   if (path.startsWith('/depot/zones')) return 'Zones de dépôt';
   if (path.startsWith('/depot/matieres')) return 'Matières premières';
@@ -481,7 +482,7 @@ function titrePage(path: string) {
   if (path.startsWith('/depot/demandes')) return 'Demandes production';
   if (path.startsWith('/depot')) return 'Dépôts & matières premières';
   if (path.startsWith('/production/matieres')) return 'Matières premières';
-  if (path.startsWith('/direction/achats')) return 'Demandes MP / commandes';
+  if (path.startsWith('/direction/achats')) return 'Demandes de matières premières / commandes';
   if (path.startsWith('/production/nomenclatures')) return 'Nomenclatures';
   if (path.startsWith('/production/lignes')) return 'Lignes de production';
   if (path.startsWith('/production')) return 'Gestion de production';

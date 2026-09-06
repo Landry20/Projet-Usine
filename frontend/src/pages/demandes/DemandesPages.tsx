@@ -23,7 +23,7 @@ export function ListeDemandesPage() {
       <div className="page-head">
         <div>
           <h2>Demandes d\'intervention</h2>
-          <p>Une DI n\'est pas un ordre de travail. Seule la conversion crée un OT numéroté.</p>
+          <p>Une demande d’intervention n’est pas un ordre de travail. Seule la conversion crée un ordre de travail numéroté.</p>
         </div>
         <div className="page-head-actions">
           <BoutonRecherche />

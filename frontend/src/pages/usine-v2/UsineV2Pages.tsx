@@ -1445,25 +1445,25 @@ export function DashboardDirectionPage() {
     <div>
       <Entete
         titre="Pilotage direction"
-        texte="Vue consolidÃ©e : production, produit fini, laboratoire et maintenance. Calculs uniquement cÃ´tÃ© serveur."
+        texte="Vue consolidée : production, produit fini, laboratoire et maintenance. Calculs uniquement côté serveur."
       />
       {err && <div className="alert alert-err">{err}</div>}
       <div className="kpis">
         <div className="kpi">
           <div className="label">Rendement extraction</div>
-          <div className="value">{d.rendementExtraction == null ? 'â€”' : `${d.rendementExtraction} %`}</div>
+          <div className="value">{d.rendementExtraction == null ? '—' : `${d.rendementExtraction} %`}</div>
         </div>
         <div className="kpi">
           <div className="label">Stock tanks</div>
           <div className="value">{d.stockTanksKg} kg</div>
         </div>
         <div className="kpi">
-          <div className="label">ConformitÃ© labo</div>
-          <div className="value">{d.conformiteLabo == null ? 'â€”' : `${d.conformiteLabo} %`}</div>
+          <div className="label">Conformité laboratoire</div>
+          <div className="value">{d.conformiteLabo == null ? '—' : `${d.conformiteLabo} %`}</div>
         </div>
         <div className="kpi">
-          <div className="label">DisponibilitÃ© machines</div>
-          <div className="value">{d.disponibiliteMachines == null ? 'â€”' : `${d.disponibiliteMachines} %`}</div>
+          <div className="label">Disponibilité des machines</div>
+          <div className="value">{d.disponibiliteMachines == null ? '—' : `${d.disponibiliteMachines} %`}</div>
         </div>
       </div>
       <div className="landing-grid2">
@@ -1473,17 +1473,17 @@ export function DashboardDirectionPage() {
           </div>
           <div className="card-b">
             <p>{d.documentsEnAttente} document(s) : {d.journauxEnAttente} journal(aux), {d.bulletinsEnAttente} bulletin(s).</p>
-            <p>{d.ncOuvertes} non-conformitÃ©(s) ouverte(s).</p>
+            <p>{d.ncOuvertes} non-conformité(s) ouverte(s).</p>
           </div>
         </article>
         <article className="card">
           <div className="card-h">
             <h3>
-              <Scale size={16} /> ChaÃ®ne de valeur
+              <Scale size={16} /> Chaîne de valeur
             </h3>
           </div>
           <div className="card-b">
-            <p>ArrÃªt machine â†’ DI maintenance. Sortie de quart â†’ tank. Bulletin â†’ dÃ©part conteneur.</p>
+            <p>Arrêt machine → demande d’intervention maintenance. Sortie de quart → tank. Bulletin → départ conteneur.</p>
           </div>
         </article>
       </div>

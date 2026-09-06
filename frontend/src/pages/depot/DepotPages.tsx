@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState, type ReactNode } from 'react';
 import { AlertTriangle, ChevronDown, Eye, Pencil, Plus, Printer, Trash2, Warehouse } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Badge } from '../../components/ui/Badge';
 import { Bouton } from '../../components/ui/Bouton';
 import { BoutonActualiser } from '../../components/ui/BoutonActualiser';
@@ -1137,7 +1138,6 @@ export function DemandesAchatPage() {
   const [fourns, setFourns] = useState<Fournisseur[]>([]);
   const [motif, setMotif] = useState<Record<number, string>>({});
   const [fournId, setFournId] = useState<Record<number, string>>({});
-  const [fournForm, setFournForm] = useState({ code: '', raisonSociale: '', email: '' });
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
   const [busy, setBusy] = useState('');
@@ -1192,56 +1192,21 @@ export function DemandesAchatPage() {
       setBusy('');
     }
   }
-  async function creerFourn(e: FormEvent) {
-    e.preventDefault();
-    setBusy('fourn');
-    setErr('');
-    try {
-      await metier.creerFournisseur(fournForm);
-      setFournForm({ code: '', raisonSociale: '', email: '' });
-      charger();
-    } catch (ex) {
-      setErr(messageApi(ex));
-    } finally {
-      setBusy('');
-    }
-  }
-
-
   return (
     <div className="page-fluide">
       <Entete
-        titre="Demandes MP / commandes"
+        titre="Demandes de matières premières / commandes"
         texte="Traitez le dossier du dépôt, puis commandez chez le fournisseur (e-mail)."
+        extra={
+          traiter ? (
+            <Link className="btn btn-ghost" to="/direction/fournisseurs">
+              Gérer les fournisseurs
+            </Link>
+          ) : undefined
+        }
       />
       {err && <div className="alert alert-err">{err}</div>}
       {ok && <div className="alert alert-ok">{ok}</div>}
-      {traiter && (
-        <form className="card" onSubmit={creerFourn}>
-          <div className="card-h">
-            <h3>Nouveau fournisseur</h3>
-          </div>
-          <div className="card-b form-grid">
-            <label className="field">
-              Code
-              <input required value={fournForm.code} onChange={(e) => setFournForm({ ...fournForm, code: e.target.value })} />
-            </label>
-            <label className="field">
-              Raison sociale
-              <input required value={fournForm.raisonSociale} onChange={(e) => setFournForm({ ...fournForm, raisonSociale: e.target.value })} />
-            </label>
-            <label className="field">
-              E-mail
-              <input required type="email" value={fournForm.email} onChange={(e) => setFournForm({ ...fournForm, email: e.target.value })} />
-            </label>
-            <div className="full">
-              <Bouton type="submit" chargement={busy === 'fourn'}>
-                Enregistrer le fournisseur
-              </Bouton>
-            </div>
-          </div>
-        </form>
-      )}
       <div className="card">
         <table className="data">
           <thead>
@@ -1282,7 +1247,7 @@ export function DemandesAchatPage() {
                         </>
                       )}
                       <Selecteur value={fournId[d.id] ?? ''} onChange={(e) => setFournId({ ...fournId, [d.id]: e.target.value })}>
-                        <option value="">Fournisseur…</option>
+                        <option value="">Choisir un fournisseur</option>
                         {fourns.map((f) => (
                           <option key={f.id} value={f.id}>
                             {f.raisonSociale}

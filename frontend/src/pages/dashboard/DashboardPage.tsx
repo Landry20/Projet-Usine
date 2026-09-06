@@ -71,18 +71,18 @@ export function DashboardPage() {
       <div className="kpis">
         {(role === 'RESP_MAINT' || role === 'ADMIN' || role === 'PLANIF') && (
           <>
-            <Kpi label="Demandes à traiter" value={d.demandesAttente} hint="Nouvelles DI" alert={d.demandesAttente > 0} />
-            <Kpi label="OT ouverts" value={d.otOuverts} />
-            <Kpi label="OT en retard" value={d.otRetard} alert={d.otRetard > 0} />
-            <Kpi label="Coût maintenance" value={fcfa(d.coutMaintenance)} hint="OT clôturés" />
+            <Kpi label="Demandes à traiter" value={d.demandesAttente} hint="Nouvelles demandes d’intervention" alert={d.demandesAttente > 0} />
+            <Kpi label="Ordres de travail ouverts" value={d.otOuverts} />
+            <Kpi label="Ordres de travail en retard" value={d.otRetard} alert={d.otRetard > 0} />
+            <Kpi label="Coût maintenance" value={fcfa(d.coutMaintenance)} hint="Ordres clôturés" />
           </>
         )}
         {role === 'TECH' && (
           <>
-            <Kpi label="Mes OT" value={d.mesOt.length} />
-            <Kpi label="OT en retard" value={d.otRetard} alert={d.otRetard > 0} />
-            <Kpi label="Demandes pièces" value={d.demandesPieces} />
-            <Kpi label="Scanner" value="QR" hint="Accès terrain" />
+            <Kpi label="Mes ordres de travail" value={d.mesOt.length} />
+            <Kpi label="Ordres de travail en retard" value={d.otRetard} alert={d.otRetard > 0} />
+            <Kpi label="Demandes de pièces" value={d.demandesPieces} />
+            <Kpi label="Scanner" value="Code" hint="Accès terrain" />
           </>
         )}
         {role === 'MAGASIN' && (
@@ -120,7 +120,7 @@ export function DashboardPage() {
       {d.series && (
         <CourbesEvolution
           series={d.series}
-          titreActivite="OT ouverts par mois"
+          titreActivite="Ordres de travail ouverts par mois"
           titreVolume="Coût maintenance par mois (FCFA)"
         />
       )}

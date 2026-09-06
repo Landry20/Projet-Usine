@@ -363,8 +363,10 @@ export interface Fournisseur {
   id: number;
   code: string;
   raisonSociale: string;
+  contact?: string | null;
   email?: string | null;
   telephone?: string | null;
+  actif?: boolean;
 }
 
 export interface LotProduit {
