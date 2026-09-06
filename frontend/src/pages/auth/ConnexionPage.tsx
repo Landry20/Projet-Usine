@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { ArrowLeft, LogIn, Mail } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { LogoManuPro } from '../../components/brand/LogoManuPro';
+import { Bouton } from '../../components/ui/Bouton';
 import { ChampMotDePasse } from '../../components/ui/ChampMotDePasse';
 import { ChampTexte } from '../../components/ui/ChampTexte';
 import { useAuth } from '../../hooks/useAuth';
@@ -56,10 +57,10 @@ export function ConnexionPage() {
           autoComplete="current-password"
         />
         <div style={{ height: 18 }} />
-        <button className="btn btn-primary" type="submit" disabled={busy} style={{ width: '100%', justifyContent: 'center' }}>
+        <Bouton type="submit" chargement={busy} style={{ width: '100%', justifyContent: 'center' }}>
           <LogIn size={16} />
-          {busy ? 'Vérification…' : 'Se connecter'}
-        </button>
+          Se connecter
+        </Bouton>
         <Link to="/" className="login-back">
           <ArrowLeft size={14} />
           Retour à la présentation

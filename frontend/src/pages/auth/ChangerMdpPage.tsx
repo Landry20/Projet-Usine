@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LogoManuPro } from '../../components/brand/LogoManuPro';
+import { Bouton } from '../../components/ui/Bouton';
 import { ChampMotDePasse } from '../../components/ui/ChampMotDePasse';
 import { authService } from '../../services/auth.service';
 import { messageApi } from '../../lib/api';
@@ -54,10 +55,10 @@ export function ChangerMdpPage() {
             autoComplete="new-password"
           />
           <div style={{ height: 18 }} />
-          <button className="btn btn-primary" type="submit">
+          <Bouton type="submit">
             <Save size={16} />
             Enregistrer
-          </button>
+          </Bouton>
         </form>
       </section>
     </div>

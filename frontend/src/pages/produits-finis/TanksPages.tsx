@@ -62,7 +62,7 @@ export function TanksPage() {
         libelle: tank.libelle ?? '',
         capaciteLitres: String(tank.capaciteLitres),
         produitId: tank.produit?.id ? String(tank.produit.id) : '',
-        siteId: '',
+        siteId: tank.site?.id ? String(tank.site.id) : tank.siteId ? String(tank.siteId) : '',
         seuilHautPct: String(tank.seuilHautPct ?? 90),
         seuilBasPct: String(tank.seuilBasPct ?? 10),
       });

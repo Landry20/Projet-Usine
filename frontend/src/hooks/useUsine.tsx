@@ -9,6 +9,7 @@ interface Ctx {
   usineId: number | null;
   usines: Site[];
   setUsineId: (id: number | null) => void;
+  rafraichirUsines: () => Promise<void>;
   peutChanger: boolean;
 }
 
@@ -21,8 +22,20 @@ export function UsineProvider({ children }: { children: ReactNode }) {
   const role = utilisateur?.role?.code;
   const peutChanger = ['ADMIN', 'DIRECTION', 'DIRECTION_GENERALE', 'CHEF_USINE'].includes(role ?? '');
 
+  async function rafraichirUsines() {
+    try {
+      setUsines(await metier.usines());
+    } catch {
+      setUsines([]);
+    }
+  }
+
   useEffect(() => {
-    metier.usines().then(setUsines).catch(() => setUsines([]));
+    if (!utilisateur) {
+      setUsines([]);
+      return;
+    }
+    void rafraichirUsines();
   }, [utilisateur?.id]);
 
   useEffect(() => {
@@ -44,6 +57,7 @@ export function UsineProvider({ children }: { children: ReactNode }) {
       usineId,
       usines,
       peutChanger,
+      rafraichirUsines,
       setUsineId: (id) => {
         setEtat(id);
         if (id) sessionStorage.setItem(CLE, String(id));

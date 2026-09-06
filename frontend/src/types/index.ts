@@ -509,7 +509,9 @@ export interface Tank {
   alerteHaut?: boolean;
   alerteBas?: boolean;
   disponibleLitres?: number;
+  siteId?: number | null;
   produit?: Produit | null;
+  site?: Site | null;
   mouvements?: TankMouvement[];
   jaugeages?: Jaugeage[];
 }

@@ -75,20 +75,73 @@ export async function assurerAccessValide(): Promise<boolean> {
   return renouvellementEnCours;
 }
 
+type ConfigBouton = { _bouton?: HTMLButtonElement };
+
+let dernierBouton: HTMLButtonElement | null = null;
+
+if (typeof document !== 'undefined') {
+  document.addEventListener(
+    'click',
+    (e) => {
+      const btn = (e.target as HTMLElement | null)?.closest('button.btn');
+      dernierBouton = btn instanceof HTMLButtonElement ? btn : null;
+    },
+    true,
+  );
+}
+
+function methodeEcriture(methode?: string) {
+  const m = (methode ?? 'get').toLowerCase();
+  return m === 'post' || m === 'put' || m === 'patch' || m === 'delete';
+}
+
+function poserSpinner(btn: HTMLButtonElement) {
+  btn.classList.add('btn-busy');
+  btn.disabled = true;
+  const n = Number(btn.dataset.req ?? '0') + 1;
+  btn.dataset.req = String(n);
+  if (!btn.querySelector('.btn-spinner')) {
+    const s = document.createElement('span');
+    s.className = 'btn-spinner';
+    s.setAttribute('aria-hidden', 'true');
+    btn.prepend(s);
+  }
+}
+
+function retirerSpinner(btn: HTMLButtonElement) {
+  const n = Math.max(0, Number(btn.dataset.req ?? '1') - 1);
+  btn.dataset.req = String(n);
+  if (n > 0) return;
+  btn.classList.remove('btn-busy');
+  btn.disabled = false;
+  btn.querySelectorAll('span.btn-spinner').forEach((el) => el.remove());
+}
+
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem(TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
   const usine = sessionStorage.getItem('gmao.usine');
   if (usine) config.headers['X-Usine-Id'] = usine;
+  const url = String(config.url ?? '');
+  if (methodeEcriture(config.method) && dernierBouton && !url.includes('/auth/refresh') && !(config as ConfigBouton)._bouton) {
+    (config as ConfigBouton)._bouton = dernierBouton;
+    poserSpinner(dernierBouton);
+  }
   return config;
 });
 
 api.interceptors.response.use(
-  (r) => r,
+  (r) => {
+    const btn = (r.config as ConfigBouton)._bouton;
+    if (btn) retirerSpinner(btn);
+    return r;
+  },
   async (erreur: AxiosError<{ message?: string }>) => {
     const original = erreur.config;
     const url = String(original?.url ?? '');
+    const btnErreur = (original as ConfigBouton | undefined)?._bouton;
     if (url.includes('/auth/refresh') || url.includes('/auth/login')) {
+      if (btnErreur) retirerSpinner(btnErreur);
       return Promise.reject(erreur);
     }
     if (erreur.response?.status === 401 && original && !(original as { _retry?: boolean })._retry) {
@@ -101,6 +154,7 @@ api.interceptors.response.use(
       }
       oublierSessionEtQuitter();
     }
+    if (btnErreur) retirerSpinner(btnErreur);
     return Promise.reject(erreur);
   },
 );

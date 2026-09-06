@@ -25,7 +25,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { ACCUEIL_COMPARTIMENT, COMPARTIMENTS, useCompartiment, type CodeCompartiment } from '../../hooks/useCompartiment';
 import { useUsine } from '../../hooks/useUsine';
 import { MENUS } from '../../lib/menus';
-import { LogoManuPro } from '../brand/LogoManuPro';
 import { InviteInstallation } from '../pwa/InviteInstallation';
 
 function initiales(prenom?: string | null, nom?: string) {
@@ -79,7 +78,6 @@ export function AppShell() {
       <aside className={`sidebar ${tiroir ? 'open' : ''}`}>
         <div className="brand">
           <div className="brand-row">
-            <LogoManuPro className="brand-icon" />
             <div>
               <div className="brand-kicker">{COMPARTIMENTS.find((c) => c.code === actif)?.kicker}</div>
               <h1>ManuPro</h1>

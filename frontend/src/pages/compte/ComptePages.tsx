@@ -111,7 +111,7 @@ export function ProfilPage() {
 
 export function ParametresPage() {
   const { utilisateur, aPermission } = useAuth();
-  const { usineId, usines, setUsineId, peutChanger } = useUsine();
+  const { usineId, usines, setUsineId, rafraichirUsines, peutChanger } = useUsine();
   const [sites, setSites] = useState<Site[]>(usines);
   const [notif, setNotif] = useState(localStorage.getItem('gmao.notif') !== '0');
   const [ancien, setAncien] = useState('');
@@ -150,6 +150,7 @@ export function ParametresPage() {
     setBusySite(true);
     try {
       const s = await metier.creerSite(siteForm);
+      await rafraichirUsines();
       setSites((liste) => [...liste, s]);
       setSiteForm({ code: '', libelle: '', ville: '' });
       setMsg(`Usine ${s.libelle} créée.`);
