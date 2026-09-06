@@ -27,7 +27,6 @@ import { useUsine } from '../../hooks/useUsine';
 import { MENUS } from '../../lib/menus';
 import { LogoManuPro } from '../brand/LogoManuPro';
 import { InviteInstallation } from '../pwa/InviteInstallation';
-import { PageChargement } from '../ui/PageChargement';
 
 function initiales(prenom?: string | null, nom?: string) {
   return `${(prenom ?? '').charAt(0)}${(nom ?? '').charAt(0)}`.toUpperCase() || 'U';
@@ -37,7 +36,7 @@ export function AppShell() {
   const { utilisateur, aPermission, deconnexion } = useAuth();
   const { actif, disponibles, setActif } = useCompartiment();
   const { usineId } = useUsine();
-  const { cleContenu, mode, actualiserGlobal } = useActualisation();
+  const { cleContenu, actualiserGlobal, mode } = useActualisation();
   const nav = useNavigate();
   const loc = useLocation();
   const menu = MENUS[actif];
@@ -76,11 +75,6 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      {mode === 'global' && (
-        <div className="overlay-global">
-          <PageChargement message="Actualisation de toute l’application…" />
-        </div>
-      )}
       {tiroir && <button type="button" className="sidebar-backdrop" aria-label="Fermer le menu" onClick={() => setTiroir(false)} />}
       <aside className={`sidebar ${tiroir ? 'open' : ''}`}>
         <div className="brand">
@@ -125,7 +119,6 @@ export function AppShell() {
             <button type="button" className="icon-btn btn-menu" aria-label="Ouvrir le menu" onClick={() => setTiroir(true)}>
               <Menu size={18} />
             </button>
-            <LogoManuPro className="topbar-logo" />
             <h2>{titrePage(loc.pathname)}</h2>
           </div>
           <div className="compartiment-choix">

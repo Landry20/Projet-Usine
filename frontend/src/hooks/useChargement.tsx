@@ -1,6 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api } from '../lib/api';
-import { BarreChargement } from '../components/ui/PageChargement';
+import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
 interface Ctx {
   enCours: boolean;
@@ -10,30 +8,9 @@ interface Ctx {
 
 const ChargementCtx = createContext<Ctx | null>(null);
 
-/** Compteur d'appels API : affiche une barre globale sans bloquer l'écran. */
+/** Plus de barre jaune globale : le chargement se voit sur le bouton de l’action. */
 export function ChargementProvider({ children }: { children: ReactNode }) {
   const [actifs, setActifs] = useState(0);
-
-  useEffect(() => {
-    const req = api.interceptors.request.use((config) => {
-      setActifs((n) => n + 1);
-      return config;
-    });
-    const res = api.interceptors.response.use(
-      (r) => {
-        setActifs((n) => Math.max(0, n - 1));
-        return r;
-      },
-      (err) => {
-        setActifs((n) => Math.max(0, n - 1));
-        return Promise.reject(err);
-      },
-    );
-    return () => {
-      api.interceptors.request.eject(req);
-      api.interceptors.response.eject(res);
-    };
-  }, []);
 
   const valeur = useMemo<Ctx>(
     () => ({
@@ -44,12 +21,7 @@ export function ChargementProvider({ children }: { children: ReactNode }) {
     [actifs],
   );
 
-  return (
-    <ChargementCtx.Provider value={valeur}>
-      <BarreChargement visible={valeur.enCours} />
-      {children}
-    </ChargementCtx.Provider>
-  );
+  return <ChargementCtx.Provider value={valeur}>{children}</ChargementCtx.Provider>;
 }
 
 export function useChargement() {

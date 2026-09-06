@@ -1,6 +1,5 @@
-import { FormEvent, useEffect, useState, type ReactNode } from 'react';
-import { FlaskConical, Plus, Scale, TestTube, Warehouse, X } from 'lucide-react';
-import { TankVisuel } from '../../components/tanks/TankVisuel';
+﻿import { FormEvent, useEffect, useState, type ReactNode } from 'react';
+import { FlaskConical, Plus, Scale, TestTube } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '../../components/ui/Badge';
 import { BoutonActualiser } from '../../components/ui/BoutonActualiser';
@@ -100,8 +99,8 @@ export function DemandesMatierePage() {
   return (
     <div>
       <Entete
-        titre="Demandes de matière première"
-        texte="Le chef de ligne demande un lot au dépôt. Le magasinier sert : le stock du lot passe en transformation."
+        titre="Demandes de matiÃ¨re premiÃ¨re"
+        texte="Le chef de ligne demande un lot au dÃ©pÃ´t. Le magasinier sert : le stock du lot passe en transformation."
       />
       {err && <div className="alert alert-err">{err}</div>}
       {aPermission('quart.saisir') && (
@@ -111,30 +110,30 @@ export function DemandesMatierePage() {
           </div>
           <div className="card-b form-grid">
             <Selecteur
-              label="Matière"
+              label="MatiÃ¨re"
               value={form.produitId}
               onChange={(e) => setForm({ ...form, produitId: e.target.value, lotDepotId: '' })}
             >
-              <option value="">Choisir…</option>
+              <option value="">Choisirâ€¦</option>
               {produits.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.refProduit} — {p.designation} ({p.quantiteStock} {p.unite})
+                  {p.refProduit} â€” {p.designation} ({p.quantiteStock} {p.unite})
                 </option>
               ))}
             </Selecteur>
-            <Selecteur label="Lot dépôt" value={form.lotDepotId} onChange={(e) => setForm({ ...form, lotDepotId: e.target.value })}>
+            <Selecteur label="Lot dÃ©pÃ´t" value={form.lotDepotId} onChange={(e) => setForm({ ...form, lotDepotId: e.target.value })}>
               <option value="">Premier lot disponible</option>
               {lots
                 .filter((l) => !form.produitId || String(l.produitId) === form.produitId)
                 .filter((l) => Number(l.quantite) > 0)
                 .map((l) => (
                   <option key={l.id} value={l.id}>
-                    {l.numero} — {l.quantite} {l.produit?.unite ?? ''} ({l.depot?.libelle ?? 'dépôt'})
+                    {l.numero} â€” {l.quantite} {l.produit?.unite ?? ''} ({l.depot?.libelle ?? 'dÃ©pÃ´t'})
                   </option>
                 ))}
             </Selecteur>
             <label className="field">
-              Quantité (kg)
+              QuantitÃ© (kg)
               <input
                 required
                 type="number"
@@ -145,10 +144,10 @@ export function DemandesMatierePage() {
               />
             </label>
             <Selecteur label="Ligne" value={form.ligneId} onChange={(e) => setForm({ ...form, ligneId: e.target.value })}>
-              <option value="">—</option>
+              <option value="">â€”</option>
               {lignes.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.code} — {l.libelle}
+                  {l.code} â€” {l.libelle}
                 </option>
               ))}
             </Selecteur>
@@ -170,10 +169,10 @@ export function DemandesMatierePage() {
           <table className="data">
             <thead>
               <tr>
-                <th>N°</th>
-                <th>Matière</th>
+                <th>NÂ°</th>
+                <th>MatiÃ¨re</th>
                 <th>Lot</th>
-                <th>Demandée</th>
+                <th>DemandÃ©e</th>
                 <th>Servie</th>
                 <th>Quart</th>
                 <th>Statut</th>
@@ -185,12 +184,12 @@ export function DemandesMatierePage() {
                 <tr key={d.id}>
                   <td className="mono">{d.numero}</td>
                   <td>
-                    {d.produit?.refProduit} — {d.produit?.designation}
+                    {d.produit?.refProduit} â€” {d.produit?.designation}
                   </td>
-                  <td className="mono">{d.lotDepot?.numero ?? '—'}</td>
+                  <td className="mono">{d.lotDepot?.numero ?? 'â€”'}</td>
                   <td>{d.quantiteDemandee}</td>
-                  <td>{d.quantiteServie ?? '—'}</td>
-                  <td>{d.quart ?? '—'}</td>
+                  <td>{d.quantiteServie ?? 'â€”'}</td>
+                  <td>{d.quart ?? 'â€”'}</td>
                   <td>
                     <Badge valeur={d.statut} />
                   </td>
@@ -208,7 +207,7 @@ export function DemandesMatierePage() {
                           }
                         />
                         <input
-                          placeholder="Motif si écart"
+                          placeholder="Motif si Ã©cart"
                           value={service[d.id]?.motif ?? ''}
                           onChange={(e) =>
                             setService({
@@ -276,23 +275,23 @@ export function JournauxQuartPage() {
     <div>
       <Entete
         titre="Journaux de quart"
-        texte="Cœur de la production : bilan matière quart par quart. Entrées = produit fini + sous-produits + écart (RG-30)."
+        texte="CÅ“ur de la production : bilan matiÃ¨re quart par quart. EntrÃ©es = produit fini + sous-produits + Ã©cart (RG-30)."
       />
       <div className="kpis">
         <div className="kpi">
-          <div className="label">Seuil alerte écart</div>
+          <div className="label">Seuil alerte Ã©cart</div>
           <div className="value">1 %</div>
           <div className="hint">Commentaire obligatoire</div>
         </div>
         <div className="kpi warn">
           <div className="label">Seuil blocage</div>
           <div className="value">3 %</div>
-          <div className="hint">Soumission refusée</div>
+          <div className="hint">Soumission refusÃ©e</div>
         </div>
         <div className="kpi">
-          <div className="label">Arrêt machine</div>
-          <div className="value">≥ 30 min</div>
-          <div className="hint">Génère une DI (RG-35)</div>
+          <div className="label">ArrÃªt machine</div>
+          <div className="value">â‰¥ 30 min</div>
+          <div className="hint">GÃ©nÃ¨re une DI (RG-35)</div>
         </div>
       </div>
       {err && <div className="alert alert-err">{err}</div>}
@@ -303,7 +302,7 @@ export function JournauxQuartPage() {
           </div>
           <div className="card-b form-grid">
             <label className="field">
-              Journée
+              JournÃ©e
               <input type="date" required value={form.dateJournee} onChange={(e) => setForm({ ...form, dateJournee: e.target.value })} />
             </label>
             <Selecteur label="Quart" value={form.quart} onChange={(e) => setForm({ ...form, quart: e.target.value })}>
@@ -312,16 +311,16 @@ export function JournauxQuartPage() {
               <option value="C">C</option>
             </Selecteur>
             <Selecteur label="Ligne" value={form.ligneId} onChange={(e) => setForm({ ...form, ligneId: e.target.value })}>
-              <option value="">Choisir…</option>
+              <option value="">Choisirâ€¦</option>
               {lignes.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.code} — {l.libelle}
+                  {l.code} â€” {l.libelle}
                 </option>
               ))}
             </Selecteur>
             <div className="full">
               <button className="btn btn-primary" type="submit">
-                <Plus size={16} /> Créer le journal
+                <Plus size={16} /> CrÃ©er le journal
               </button>
             </div>
           </div>
@@ -332,12 +331,12 @@ export function JournauxQuartPage() {
           <table className="data">
             <thead>
               <tr>
-                <th>N°</th>
+                <th>NÂ°</th>
                 <th>Jour</th>
                 <th>Quart</th>
                 <th>Ligne</th>
-                <th>Entrées</th>
-                <th>Écart</th>
+                <th>EntrÃ©es</th>
+                <th>Ã‰cart</th>
                 <th>Rendement</th>
                 <th>Statut</th>
               </tr>
@@ -352,12 +351,12 @@ export function JournauxQuartPage() {
                   </td>
                   <td>{dateFr(j.dateJournee)}</td>
                   <td>{j.quart}</td>
-                  <td>{j.ligne?.libelle ?? '—'}</td>
+                  <td>{j.ligne?.libelle ?? 'â€”'}</td>
                   <td>{j.totalEntreesKg} kg</td>
                   <td>
-                    {j.ecartKg} kg ({j.ecartPct ?? '—'} %)
+                    {j.ecartKg} kg ({j.ecartPct ?? 'â€”'} %)
                   </td>
-                  <td>{j.rendementPct ?? '—'} %</td>
+                  <td>{j.rendementPct ?? 'â€”'} %</td>
                   <td>
                     <Badge valeur={j.statut} />
                   </td>
@@ -411,19 +410,19 @@ export function FicheJournalPage() {
     }
   }
 
-  if (!j) return <p>Chargement du journal…</p>;
+  if (!j) return <p>Chargement du journalâ€¦</p>;
   const saisissable = j.statut === 'BROUILLON' || j.statut === 'RETOURNE';
 
   return (
     <div>
       <Entete
-        titre={`${j.numero} — quart ${j.quart}`}
-        texte={`${dateFr(j.dateJournee)} · ${j.ligne?.libelle ?? ''} · ${j.chefQuart?.prenom ?? ''} ${j.chefQuart?.nom ?? ''}`}
+        titre={`${j.numero} â€” quart ${j.quart}`}
+        texte={`${dateFr(j.dateJournee)} Â· ${j.ligne?.libelle ?? ''} Â· ${j.chefQuart?.prenom ?? ''} ${j.chefQuart?.nom ?? ''}`}
       />
       {err && <div className="alert alert-err">{err}</div>}
       <div className="kpis">
         <div className="kpi">
-          <div className="label">Entrées</div>
+          <div className="label">EntrÃ©es</div>
           <div className="value">{j.totalEntreesKg}</div>
         </div>
         <div className="kpi">
@@ -431,13 +430,13 @@ export function FicheJournalPage() {
           <div className="value">{j.totalSortiesKg}</div>
         </div>
         <div className={`kpi ${Math.abs(Number(j.ecartPct ?? 0)) >= 1 ? 'warn' : ''}`}>
-          <div className="label">Écart</div>
-          <div className="value">{j.ecartPct ?? '—'} %</div>
+          <div className="label">Ã‰cart</div>
+          <div className="value">{j.ecartPct ?? 'â€”'} %</div>
           <div className="hint">{j.ecartKg} kg</div>
         </div>
         <div className="kpi">
           <div className="label">Rendement</div>
-          <div className="value">{j.rendementPct ?? '—'} %</div>
+          <div className="value">{j.rendementPct ?? 'â€”'} %</div>
         </div>
       </div>
       <p>
@@ -462,7 +461,7 @@ export function FicheJournalPage() {
             }}
           >
             <div className="card-h">
-              <h3>Entrée matière (demande déjà servie)</h3>
+              <h3>EntrÃ©e matiÃ¨re (demande dÃ©jÃ  servie)</h3>
             </div>
             <div className="card-b form-grid">
               <Selecteur
@@ -470,24 +469,24 @@ export function FicheJournalPage() {
                 value={entree.demandeMatiereId}
                 onChange={(e) => setEntree({ ...entree, demandeMatiereId: e.target.value })}
               >
-                <option value="">Choisir…</option>
+                <option value="">Choisirâ€¦</option>
                 {dms.map((d) => (
                   <option key={d.id} value={d.id}>
-                    {d.numero} — {d.produit?.designation} ({d.quantiteServie} kg)
+                    {d.numero} â€” {d.produit?.designation} ({d.quantiteServie} kg)
                   </option>
                 ))}
               </Selecteur>
               <label className="field">
-                Quantité (kg)
+                QuantitÃ© (kg)
                 <input type="number" step="0.01" value={entree.quantiteKg} onChange={(e) => setEntree({ ...entree, quantiteKg: e.target.value })} />
               </label>
               <label className="field">
-                Lot matière
+                Lot matiÃ¨re
                 <input value={entree.lotMatiere} onChange={(e) => setEntree({ ...entree, lotMatiere: e.target.value })} />
               </label>
               <div className="full">
                 <button className="btn btn-primary" type="submit">
-                  Ajouter l’entrée
+                  Ajouter lâ€™entrÃ©e
                 </button>
               </div>
             </div>
@@ -511,24 +510,24 @@ export function FicheJournalPage() {
             </div>
             <div className="card-b form-grid">
               <Selecteur label="Produit" value={sortie.produitId} onChange={(e) => setSortie({ ...sortie, produitId: e.target.value })}>
-                <option value="">Choisir…</option>
+                <option value="">Choisirâ€¦</option>
                 {produits
                   .filter((p) => p.typeProduit === 'PRODUIT_FINI' || p.typeProduit === 'SOUS_PRODUIT')
                   .map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.refProduit} — {p.designation}
+                      {p.refProduit} â€” {p.designation}
                     </option>
                   ))}
               </Selecteur>
               <label className="field">
-                Quantité (kg)
+                QuantitÃ© (kg)
                 <input required type="number" min="0" step="0.01" value={sortie.quantiteKg} onChange={(e) => setSortie({ ...sortie, quantiteKg: e.target.value })} />
               </label>
               <Selecteur label="Tank (si PF)" value={sortie.tankId} onChange={(e) => setSortie({ ...sortie, tankId: e.target.value })}>
-                <option value="">—</option>
+                <option value="">â€”</option>
                 {tanks.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.code} — {t.libelle}
+                    {t.code} â€” {t.libelle}
                   </option>
                 ))}
               </Selecteur>
@@ -557,21 +556,21 @@ export function FicheJournalPage() {
             }}
           >
             <div className="card-h">
-              <h3>Arrêt de ligne</h3>
+              <h3>ArrÃªt de ligne</h3>
             </div>
             <p className="card-b" style={{ paddingBottom: 0 }}>
-              Une panne mécanique ou électrique crée automatiquement une demande d’intervention vers la Maintenance.
+              Une panne mÃ©canique ou Ã©lectrique crÃ©e automatiquement une demande dâ€™intervention vers la Maintenance.
             </p>
             <div className="card-b form-grid">
               <Selecteur label="Type" value={arret.typeArret} onChange={(e) => setArret({ ...arret, typeArret: e.target.value })}>
-                <option value="PANNE">Panne méca / élec</option>
-                <option value="REGLAGE">Réglage</option>
-                <option value="ENERGIE">Énergie</option>
-                <option value="MP">Manque de matière</option>
+                <option value="PANNE">Panne mÃ©ca / Ã©lec</option>
+                <option value="REGLAGE">RÃ©glage</option>
+                <option value="ENERGIE">Ã‰nergie</option>
+                <option value="MP">Manque de matiÃ¨re</option>
                 <option value="NETTOYAGE">Nettoyage</option>
               </Selecteur>
               <label className="field">
-                Durée (min)
+                DurÃ©e (min)
                 <input required type="number" min="1" value={arret.dureeMin} onChange={(e) => setArret({ ...arret, dureeMin: e.target.value })} />
               </label>
               <label className="field">
@@ -580,7 +579,7 @@ export function FicheJournalPage() {
               </label>
               <div className="full">
                 <button className="btn" type="submit">
-                  Déclarer l’arrêt
+                  DÃ©clarer lâ€™arrÃªt
                 </button>
               </div>
             </div>
@@ -594,15 +593,15 @@ export function FicheJournalPage() {
         </div>
         <div className="card-b">
           <p>
-            <strong>Entrées</strong>
+            <strong>EntrÃ©es</strong>
           </p>
           <ul>
             {(j.entrees ?? []).map((e) => (
               <li key={e.id}>
-                {e.produit?.designation} — {e.quantiteKg} kg {e.demandeMatiere ? `(${e.demandeMatiere.numero})` : ''}
+                {e.produit?.designation} â€” {e.quantiteKg} kg {e.demandeMatiere ? `(${e.demandeMatiere.numero})` : ''}
               </li>
             ))}
-            {!j.entrees?.length && <li>Aucune entrée.</li>}
+            {!j.entrees?.length && <li>Aucune entrÃ©e.</li>}
           </ul>
           <p>
             <strong>Sorties</strong>
@@ -610,21 +609,21 @@ export function FicheJournalPage() {
           <ul>
             {(j.sorties ?? []).map((s) => (
               <li key={s.id}>
-                {s.produit?.designation} — {s.quantiteKg} kg {s.tank ? `→ ${s.tank.code}` : ''}
+                {s.produit?.designation} â€” {s.quantiteKg} kg {s.tank ? `â†’ ${s.tank.code}` : ''}
               </li>
             ))}
             {!j.sorties?.length && <li>Aucune sortie.</li>}
           </ul>
           <p>
-            <strong>Arrêts</strong>
+            <strong>ArrÃªts</strong>
           </p>
           <ul>
             {(j.arrets ?? []).map((a) => (
               <li key={a.id}>
-                {a.typeArret} {a.dureeMin} min {a.demandeIntervention ? `→ ${a.demandeIntervention.numero}` : ''}
+                {a.typeArret} {a.dureeMin} min {a.demandeIntervention ? `â†’ ${a.demandeIntervention.numero}` : ''}
               </li>
             ))}
-            {!j.arrets?.length && <li>Aucun arrêt.</li>}
+            {!j.arrets?.length && <li>Aucun arrÃªt.</li>}
           </ul>
         </div>
       </div>
@@ -633,7 +632,7 @@ export function FicheJournalPage() {
         <div className="card">
           <div className="card-b form-grid">
             <label className="field full">
-              Commentaire d’écart (obligatoire dès 1 %)
+              Commentaire dâ€™Ã©cart (obligatoire dÃ¨s 1 %)
               <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} rows={3} />
             </label>
             <div className="full">
@@ -647,181 +646,18 @@ export function FicheJournalPage() {
       {j.statut === 'SOUMIS' && aPermission('quart.valider') && (
         <div className="page-head-actions">
           <button className="btn btn-ok" type="button" onClick={() => run(() => metier.verifierJournal(j.id))}>
-            Vérifier
+            VÃ©rifier
           </button>
-          <button className="btn" type="button" onClick={() => run(() => metier.retournerJournal(j.id, window.prompt('Motif de retour') || 'À compléter'))}>
+          <button className="btn" type="button" onClick={() => run(() => metier.retournerJournal(j.id, window.prompt('Motif de retour') || 'Ã€ complÃ©ter'))}>
             Retourner
           </button>
         </div>
       )}
       {j.statut === 'VERIFIE' && aPermission('quart.valider') && (
         <button className="btn btn-ok" type="button" onClick={() => run(() => metier.approuverJournal(j.id))}>
-          Approuver (entrée tanks)
+          Approuver (entrÃ©e tanks)
         </button>
       )}
-    </div>
-  );
-}
-
-export function TanksPage() {
-  const { aPermission } = useAuth();
-  const [tanks, setTanks] = useState<Tank[]>([]);
-  const [choisi, setChoisi] = useState<Tank | null>(null);
-  const [err, setErr] = useState('');
-  const [jauge, setJauge] = useState({ h: '', volume: '', ajuster: false });
-
-  function charger() {
-    metier.tanks().then((liste) => {
-      setTanks(liste);
-      setChoisi((actuel) => (actuel ? liste.find((t) => t.id === actuel.id) ?? actuel : actuel));
-    });
-  }
-  useEffect(() => {
-    charger();
-  }, []);
-
-  async function ouvrir(t: Tank) {
-    setJauge({ h: '', volume: '', ajuster: false });
-    try {
-      const fiche = await metier.tank(t.id);
-      setChoisi({ ...t, ...fiche });
-    } catch {
-      setChoisi(t);
-    }
-  }
-
-  async function jauger() {
-    if (!choisi) return;
-    setErr('');
-    try {
-      const hauteur = jauge.h.trim() === '' ? undefined : Number(jauge.h);
-      const volume = jauge.volume.trim() === '' ? undefined : Number(jauge.volume);
-      if (hauteur == null && volume == null) {
-        setErr('Indiquez une hauteur (cm) ou un volume (L).');
-        return;
-      }
-      await metier.jaugerTank(choisi.id, {
-        ...(hauteur != null && Number.isFinite(hauteur) ? { hauteurCm: hauteur } : {}),
-        ...(volume != null && Number.isFinite(volume) ? { volumeLitres: volume } : {}),
-        ajusterStock: jauge.ajuster,
-      });
-      charger();
-      const fiche = await metier.tank(choisi.id);
-      setChoisi(fiche);
-    } catch (ex) {
-      setErr(messageApi(ex));
-    }
-  }
-
-  return (
-    <div>
-      <Entete
-        titre="Parc de tanks"
-        texte="Cliquez un tank pour le voir en grand à gauche, avec le niveau d’huile et les statistiques."
-      />
-      {err && <div className="alert alert-err">{err}</div>}
-      <div className={`parc-tanks ${choisi ? 'ouvert' : ''}`}>
-        {choisi && (
-          <aside className="tank-tiroir">
-            <div className="page-head-actions" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
-              <strong>{choisi.code} — {choisi.libelle}</strong>
-              <button type="button" className="icon-btn" aria-label="Fermer" onClick={() => setChoisi(null)}>
-                <X size={16} />
-              </button>
-            </div>
-            <div className="tank-tiroir-visuel">
-              <TankVisuel tank={choisi} taille="l" />
-            </div>
-            <p>
-              {choisi.produit?.designation ?? 'Aucun produit affecté'} · <Badge valeur={choisi.statut} />
-            </p>
-            <div className="tank-stats">
-              <div className="tank-stat">
-                <div className="k">Stock</div>
-                <div className="v">{choisi.stockLitres} L</div>
-              </div>
-              <div className="tank-stat">
-                <div className="k">Capacité</div>
-                <div className="v">{choisi.capaciteLitres} L</div>
-              </div>
-              <div className="tank-stat">
-                <div className="k">Masse</div>
-                <div className="v">{choisi.stockKg} kg</div>
-              </div>
-              <div className="tank-stat">
-                <div className="k">Disponible</div>
-                <div className="v">{choisi.disponibleLitres ?? choisi.stockLitres} L</div>
-              </div>
-              <div className="tank-stat">
-                <div className="k">Réservé</div>
-                <div className="v">{choisi.litresReserves} L</div>
-              </div>
-              <div className="tank-stat">
-                <div className="k">Remplissage</div>
-                <div className="v">{choisi.remplissagePct ?? 0} %</div>
-              </div>
-            </div>
-            {aPermission('tank.gerer') && (
-              <div className="form-grid">
-                <label className="field">
-                  Volume observé (L)
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder={choisi.stockLitres}
-                    value={jauge.volume}
-                    onChange={(e) => setJauge({ ...jauge, volume: e.target.value })}
-                  />
-                </label>
-                <label className="field">
-                  Hauteur (cm)
-                  <input type="number" min="0" step="0.1" value={jauge.h} onChange={(e) => setJauge({ ...jauge, h: e.target.value })} />
-                </label>
-                <label className="field">
-                  <input type="checkbox" checked={jauge.ajuster} onChange={(e) => setJauge({ ...jauge, ajuster: e.target.checked })} />
-                  {' '}Mettre à jour le niveau du tank
-                </label>
-                <div className="full">
-                  <button type="button" className="btn btn-primary" onClick={jauger}>
-                    Enregistrer le jaugeage
-                  </button>
-                </div>
-              </div>
-            )}
-            {(choisi.mouvements ?? []).length > 0 && (
-              <div style={{ marginTop: 14 }}>
-                <h3 style={{ fontSize: 14, margin: '0 0 8px' }}>Derniers mouvements</h3>
-                <ul>
-                  {choisi.mouvements!.slice(0, 6).map((m) => (
-                    <li key={m.id}>
-                      <Badge valeur={m.typeMvt} /> {m.quantiteLitres} L · {dateFr(m.dateMvt)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </aside>
-        )}
-        <div className="parc-tanks-grille">
-          {tanks.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`tank-carte ${choisi?.id === t.id ? 'active' : ''}`}
-              onClick={() => ouvrir(t)}
-            >
-              <TankVisuel tank={t} />
-              <h3>{t.code}</h3>
-              <p>{t.libelle}</p>
-              <p>
-                {t.stockLitres} / {t.capaciteLitres} L
-              </p>
-            </button>
-          ))}
-        </div>
-      </div>
-      {!tanks.length && <p>Aucun tank. Relancez le seed pour TK-01 / TK-02.</p>}
     </div>
   );
 }
@@ -856,19 +692,19 @@ export function ExpeditionsPage() {
 
   return (
     <div>
-      <Entete titre="Expéditions / empotage" texte="Conteneur, flexitank unique, pesée pont bascule. Bulletin obligatoire avant clôture (RG-39)." />
+      <Entete titre="ExpÃ©ditions / empotage" texte="Conteneur, flexitank unique, pesÃ©e pont bascule. Bulletin obligatoire avant clÃ´ture (RG-39)." />
       {err && <div className="alert alert-err">{err}</div>}
       {aPermission('pf.expedier') && (
         <form className="card" onSubmit={creer}>
           <div className="card-h">
-            <h3>Nouvelle expédition</h3>
+            <h3>Nouvelle expÃ©dition</h3>
           </div>
           <div className="card-b form-grid">
             <Selecteur label="Client" value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })}>
-              <option value="">Choisir…</option>
+              <option value="">Choisirâ€¦</option>
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.code} — {c.raisonSociale}
+                  {c.code} â€” {c.raisonSociale}
                 </option>
               ))}
             </Selecteur>
@@ -882,7 +718,7 @@ export function ExpeditionsPage() {
             </label>
             <div className="full">
               <button className="btn btn-primary" type="submit">
-                Créer
+                CrÃ©er
               </button>
             </div>
           </div>
@@ -893,7 +729,7 @@ export function ExpeditionsPage() {
           <table className="data">
             <thead>
               <tr>
-                <th>N°</th>
+                <th>NÂ°</th>
                 <th>Client</th>
                 <th>Date</th>
                 <th>kg</th>
@@ -919,7 +755,7 @@ export function ExpeditionsPage() {
               {!page?.donnees.length && (
                 <tr>
                   <td colSpan={5} className="empty">
-                    Aucune expédition.
+                    Aucune expÃ©dition.
                   </td>
                 </tr>
               )}
@@ -966,14 +802,14 @@ export function FicheExpeditionPage() {
     }
   }
 
-  if (!e) return <p>Chargement…</p>;
+  if (!e) return <p>Chargementâ€¦</p>;
 
   return (
     <div>
-      <Entete titre={e.numero} texte={`${e.client?.raisonSociale ?? ''} · ${e.destination ?? ''}`} />
+      <Entete titre={e.numero} texte={`${e.client?.raisonSociale ?? ''} Â· ${e.destination ?? ''}`} />
       {err && <div className="alert alert-err">{err}</div>}
       <p>
-        <Badge valeur={e.statut} /> · {e.totalLitres} L · {e.totalKg} kg
+        <Badge valeur={e.statut} /> Â· {e.totalLitres} L Â· {e.totalKg} kg
       </p>
       {e.statut === 'BROUILLON' && (
         <form
@@ -998,7 +834,7 @@ export function FicheExpeditionPage() {
           </div>
           <div className="card-b form-grid">
             <Selecteur label="Tank" value={ch.tankId} onChange={(ev) => setCh({ ...ch, tankId: ev.target.value })}>
-              <option value="">Choisir…</option>
+              <option value="">Choisirâ€¦</option>
               {tanks.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.code} ({t.stockLitres} L)
@@ -1026,10 +862,10 @@ export function FicheExpeditionPage() {
               <input type="number" value={ch.poidsBrutKg} onChange={(ev) => setCh({ ...ch, poidsBrutKg: ev.target.value })} />
             </label>
             <Selecteur label="Bulletin" value={ch.bulletinAnalyseId} onChange={(ev) => setCh({ ...ch, bulletinAnalyseId: ev.target.value })}>
-              <option value="">À lier plus tard</option>
+              <option value="">Ã€ lier plus tard</option>
               {bulletins.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.numero} — {b.conclusion}
+                  {b.numero} â€” {b.conclusion}
                 </option>
               ))}
             </Selecteur>
@@ -1061,8 +897,8 @@ export function FicheExpeditionPage() {
                   <td className="mono">{c.numeroFlexitank}</td>
                   <td>{c.tank?.code}</td>
                   <td>{c.quantiteLitres}</td>
-                  <td>{c.poidsNetKg ?? '—'}</td>
-                  <td>{c.bulletinAnalyse?.numero ?? '—'}</td>
+                  <td>{c.poidsNetKg ?? 'â€”'}</td>
+                  <td>{c.bulletinAnalyse?.numero ?? 'â€”'}</td>
                 </tr>
               ))}
             </tbody>
@@ -1071,7 +907,7 @@ export function FicheExpeditionPage() {
       </div>
       {e.statut === 'BROUILLON' && (
         <button className="btn btn-ok" type="button" onClick={() => run(() => metier.cloturerExpedition(e.id))}>
-          Clôturer l’expédition
+          ClÃ´turer lâ€™expÃ©dition
         </button>
       )}
     </div>
@@ -1085,16 +921,16 @@ export function DashboardLaboPage() {
     metier.dashboardLabo().then(setD).catch(() => setErr('Impossible de charger le laboratoire.'));
   }, []);
   if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargement…</p>;
+  if (!d) return <p>Chargementâ€¦</p>;
   return (
     <div>
       <Entete
-        titre="Laboratoire et qualité"
-        texte="Un bulletin d’analyse conditionne le départ d’un conteneur. Sans bulletin conforme, l’expédition ne se clôture pas (RG-39)."
+        titre="Laboratoire et qualitÃ©"
+        texte="Un bulletin dâ€™analyse conditionne le dÃ©part dâ€™un conteneur. Sans bulletin conforme, lâ€™expÃ©dition ne se clÃ´ture pas (RG-39)."
       />
       <div className="kpis">
         <div className="kpi">
-          <div className="label">Échantillons</div>
+          <div className="label">Ã‰chantillons</div>
           <div className="value">{d.echantillons}</div>
         </div>
         <div className="kpi">
@@ -1102,11 +938,11 @@ export function DashboardLaboPage() {
           <div className="value">{d.bulletinsEnCours}</div>
         </div>
         <div className="kpi ok">
-          <div className="label">Taux de conformité</div>
-          <div className="value">{d.tauxConformite == null ? '—' : `${d.tauxConformite} %`}</div>
+          <div className="label">Taux de conformitÃ©</div>
+          <div className="value">{d.tauxConformite == null ? 'â€”' : `${d.tauxConformite} %`}</div>
         </div>
         <div className={`kpi ${d.ncOuvertes ? 'alert' : ''}`}>
-          <div className="label">Non-conformités ouvertes</div>
+          <div className="label">Non-conformitÃ©s ouvertes</div>
           <div className="value">{d.ncOuvertes}</div>
         </div>
       </div>
@@ -1149,34 +985,34 @@ export function EchantillonsPage() {
 
   return (
     <div>
-      <Entete titre="Échantillons" texte="Prélèvements MP, process, tank ou chargement. Numéro ECH-AAAA-NNNNN." />
+      <Entete titre="Ã‰chantillons" texte="PrÃ©lÃ¨vements MP, process, tank ou chargement. NumÃ©ro ECH-AAAA-NNNNN." />
       {err && <div className="alert alert-err">{err}</div>}
       {aPermission('labo.saisir') && (
         <form className="card" onSubmit={creer}>
           <div className="card-h">
             <h3>
-              <TestTube size={16} /> Nouveau prélèvement
+              <TestTube size={16} /> Nouveau prÃ©lÃ¨vement
             </h3>
           </div>
           <div className="card-b form-grid">
             <Selecteur label="Produit" value={form.produitId} onChange={(e) => setForm({ ...form, produitId: e.target.value })}>
-              <option value="">Choisir…</option>
+              <option value="">Choisirâ€¦</option>
               {produits.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.refProduit} — {p.designation}
+                  {p.refProduit} â€” {p.designation}
                 </option>
               ))}
             </Selecteur>
             <Selecteur label="Point" value={form.pointId} onChange={(e) => setForm({ ...form, pointId: e.target.value })}>
-              <option value="">—</option>
+              <option value="">â€”</option>
               {points.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.code} — {p.libelle}
+                  {p.code} â€” {p.libelle}
                 </option>
               ))}
             </Selecteur>
             <Selecteur label="Tank" value={form.tankId} onChange={(e) => setForm({ ...form, tankId: e.target.value })}>
-              <option value="">—</option>
+              <option value="">â€”</option>
               {tanks.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.code}
@@ -1185,7 +1021,7 @@ export function EchantillonsPage() {
             </Selecteur>
             <div className="full">
               <button className="btn btn-primary" type="submit">
-                Prélever
+                PrÃ©lever
               </button>
             </div>
           </div>
@@ -1196,7 +1032,7 @@ export function EchantillonsPage() {
           <table className="data">
             <thead>
               <tr>
-                <th>N°</th>
+                <th>NÂ°</th>
                 <th>Produit</th>
                 <th>Point</th>
                 <th>Date</th>
@@ -1211,7 +1047,7 @@ export function EchantillonsPage() {
                     </Link>
                   </td>
                   <td>{e.produit?.designation}</td>
-                  <td>{e.point?.libelle ?? '—'}</td>
+                  <td>{e.point?.libelle ?? 'â€”'}</td>
                   <td>{dateFr(e.datePrelevement)}</td>
                 </tr>
               ))}
@@ -1238,11 +1074,11 @@ export function FicheEchantillonPage() {
     metier.parametresAnalyse().then(setParams);
   }, [id]);
 
-  if (!e) return <p>Chargement…</p>;
+  if (!e) return <p>Chargementâ€¦</p>;
 
   return (
     <div>
-      <Entete titre={e.numero} texte={`${e.produit?.designation ?? ''} · ${e.point?.libelle ?? ''}`} />
+      <Entete titre={e.numero} texte={`${e.produit?.designation ?? ''} Â· ${e.point?.libelle ?? ''}`} />
       {err && <div className="alert alert-err">{err}</div>}
       {aPermission('labo.saisir') && (
         <form
@@ -1258,14 +1094,14 @@ export function FicheEchantillonPage() {
           }}
         >
           <div className="card-h">
-            <h3>Résultat d’analyse</h3>
+            <h3>RÃ©sultat dâ€™analyse</h3>
           </div>
           <div className="card-b form-grid">
-            <Selecteur label="Paramètre" value={ligne.parametreId} onChange={(ev) => setLigne({ ...ligne, parametreId: ev.target.value })}>
-              <option value="">Choisir…</option>
+            <Selecteur label="ParamÃ¨tre" value={ligne.parametreId} onChange={(ev) => setLigne({ ...ligne, parametreId: ev.target.value })}>
+              <option value="">Choisirâ€¦</option>
               {params.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.code} — {p.libelle}
+                  {p.code} â€” {p.libelle}
                 </option>
               ))}
             </Selecteur>
@@ -1285,7 +1121,7 @@ export function FicheEchantillonPage() {
         <table className="data">
           <thead>
             <tr>
-              <th>Paramètre</th>
+              <th>ParamÃ¨tre</th>
               <th>Valeur</th>
               <th>Conforme</th>
             </tr>
@@ -1297,7 +1133,7 @@ export function FicheEchantillonPage() {
                 <td>
                   {a.valeurNumerique ?? a.valeurTexte} {a.parametre?.unite}
                 </td>
-                <td>{a.conforme == null ? '—' : a.conforme ? 'Oui' : 'Non'}</td>
+                <td>{a.conforme == null ? 'â€”' : a.conforme ? 'Oui' : 'Non'}</td>
               </tr>
             ))}
           </tbody>
@@ -1312,7 +1148,7 @@ export function FicheEchantillonPage() {
             nav(`/laboratoire/bulletins/${b.id}`);
           }}
         >
-          Créer le bulletin
+          CrÃ©er le bulletin
         </button>
       )}
       {e.bulletin && (
@@ -1332,16 +1168,16 @@ export function BulletinsPage() {
   return (
     <div>
       <Entete
-        titre="Bulletins d’analyse"
-        texte="Saisie → vérification → approbation. Le même utilisateur ne valide pas deux étapes de suite."
+        titre="Bulletins dâ€™analyse"
+        texte="Saisie â†’ vÃ©rification â†’ approbation. Le mÃªme utilisateur ne valide pas deux Ã©tapes de suite."
       />
       <div className="card">
         <div className="table-wrap">
           <table className="data">
             <thead>
               <tr>
-                <th>N°</th>
-                <th>Échantillon</th>
+                <th>NÂ°</th>
+                <th>Ã‰chantillon</th>
                 <th>Conclusion</th>
                 <th>Statut</th>
               </tr>
@@ -1397,7 +1233,7 @@ export function FicheBulletinPage() {
     }
   }
 
-  if (!b) return <p>Chargement…</p>;
+  if (!b) return <p>Chargementâ€¦</p>;
   return (
     <div>
       <Entete titre={b.numero} texte={b.echantillon?.produit?.designation ?? ''} extra={<FlaskConical size={18} />} />
@@ -1409,7 +1245,7 @@ export function FicheBulletinPage() {
         <table className="data">
           <thead>
             <tr>
-              <th>Paramètre</th>
+              <th>ParamÃ¨tre</th>
               <th>Valeur</th>
               <th>Conforme</th>
             </tr>
@@ -1419,7 +1255,7 @@ export function FicheBulletinPage() {
               <tr key={a.id}>
                 <td>{a.parametre?.libelle}</td>
                 <td>{a.valeurNumerique ?? a.valeurTexte}</td>
-                <td>{a.conforme == null ? '—' : a.conforme ? 'Oui' : 'Non'}</td>
+                <td>{a.conforme == null ? 'â€”' : a.conforme ? 'Oui' : 'Non'}</td>
               </tr>
             ))}
           </tbody>
@@ -1433,7 +1269,7 @@ export function FicheBulletinPage() {
         )}
         {b.statut === 'SOUMIS' && aPermission('labo.valider') && (
           <button className="btn btn-ok" type="button" onClick={() => run(() => metier.verifierBulletin(b.id))}>
-            Vérifier
+            VÃ©rifier
           </button>
         )}
         {b.statut === 'VERIFIE' && aPermission('labo.valider') && (
@@ -1442,7 +1278,7 @@ export function FicheBulletinPage() {
               Approuver
             </button>
             <button className="btn" type="button" onClick={() => run(() => metier.approuverBulletin(b.id, { derogation: true }))}>
-              Approuver avec dérogation
+              Approuver avec dÃ©rogation
             </button>
           </>
         )}
@@ -1466,7 +1302,7 @@ export function NonConformitesPage() {
 
   return (
     <div>
-      <Entete titre="Non-conformités" texte="Blocage, déclassement ou dérogation. Une NC ouverte peut bloquer un tank." />
+      <Entete titre="Non-conformitÃ©s" texte="Blocage, dÃ©classement ou dÃ©rogation. Une NC ouverte peut bloquer un tank." />
       {err && <div className="alert alert-err">{err}</div>}
       {aPermission('labo.saisir') && (
         <form
@@ -1500,9 +1336,9 @@ export function NonConformitesPage() {
           <table className="data">
             <thead>
               <tr>
-                <th>N°</th>
+                <th>NÂ°</th>
                 <th>Description</th>
-                <th>Décision</th>
+                <th>DÃ©cision</th>
                 <th>Statut</th>
                 <th />
               </tr>
@@ -1512,7 +1348,7 @@ export function NonConformitesPage() {
                 <tr key={n.id}>
                   <td className="mono">{n.numero}</td>
                   <td>{n.description}</td>
-                  <td>{n.decision ?? '—'}</td>
+                  <td>{n.decision ?? 'â€”'}</td>
                   <td>
                     <Badge valeur={n.statut} />
                   </td>
@@ -1522,7 +1358,7 @@ export function NonConformitesPage() {
                         type="button"
                         className="btn"
                         onClick={async () => {
-                          const decision = window.prompt('Décision : BLOCAGE, DECLASSEMENT ou DEROGATION', 'BLOCAGE');
+                          const decision = window.prompt('DÃ©cision : BLOCAGE, DECLASSEMENT ou DEROGATION', 'BLOCAGE');
                           const justification = window.prompt('Justification') || '';
                           if (!decision) return;
                           try {
@@ -1533,7 +1369,7 @@ export function NonConformitesPage() {
                           }
                         }}
                       >
-                        Décider
+                        DÃ©cider
                       </button>
                     )}
                   </td>
@@ -1542,7 +1378,7 @@ export function NonConformitesPage() {
               {!page?.donnees.length && (
                 <tr>
                   <td colSpan={5} className="empty">
-                    Aucune non-conformité.
+                    Aucune non-conformitÃ©.
                   </td>
                 </tr>
               )}
@@ -1561,29 +1397,29 @@ export function DashboardDirectionPage() {
     metier.dashboardDirection().then(setD).catch(() => setErr('Impossible de charger le pilotage direction.'));
   }, []);
   if (err) return <div className="alert alert-err">{err}</div>;
-  if (!d) return <p>Chargement…</p>;
+  if (!d) return <p>Chargementâ€¦</p>;
   return (
     <div>
       <Entete
         titre="Pilotage direction"
-        texte="Vue consolidée : production, produit fini, laboratoire et maintenance. Calculs uniquement côté serveur."
+        texte="Vue consolidÃ©e : production, produit fini, laboratoire et maintenance. Calculs uniquement cÃ´tÃ© serveur."
       />
       <div className="kpis">
         <div className="kpi">
           <div className="label">Rendement extraction</div>
-          <div className="value">{d.rendementExtraction == null ? '—' : `${d.rendementExtraction} %`}</div>
+          <div className="value">{d.rendementExtraction == null ? 'â€”' : `${d.rendementExtraction} %`}</div>
         </div>
         <div className="kpi">
           <div className="label">Stock tanks</div>
           <div className="value">{d.stockTanksKg} kg</div>
         </div>
         <div className="kpi">
-          <div className="label">Conformité labo</div>
-          <div className="value">{d.conformiteLabo == null ? '—' : `${d.conformiteLabo} %`}</div>
+          <div className="label">ConformitÃ© labo</div>
+          <div className="value">{d.conformiteLabo == null ? 'â€”' : `${d.conformiteLabo} %`}</div>
         </div>
         <div className="kpi">
-          <div className="label">Disponibilité machines</div>
-          <div className="value">{d.disponibiliteMachines == null ? '—' : `${d.disponibiliteMachines} %`}</div>
+          <div className="label">DisponibilitÃ© machines</div>
+          <div className="value">{d.disponibiliteMachines == null ? 'â€”' : `${d.disponibiliteMachines} %`}</div>
         </div>
       </div>
       <div className="landing-grid2">
@@ -1593,17 +1429,17 @@ export function DashboardDirectionPage() {
           </div>
           <div className="card-b">
             <p>{d.documentsEnAttente} document(s) : {d.journauxEnAttente} journal(aux), {d.bulletinsEnAttente} bulletin(s).</p>
-            <p>{d.ncOuvertes} non-conformité(s) ouverte(s).</p>
+            <p>{d.ncOuvertes} non-conformitÃ©(s) ouverte(s).</p>
           </div>
         </article>
         <article className="card">
           <div className="card-h">
             <h3>
-              <Scale size={16} /> Chaîne de valeur
+              <Scale size={16} /> ChaÃ®ne de valeur
             </h3>
           </div>
           <div className="card-b">
-            <p>Arrêt machine → DI maintenance. Sortie de quart → tank. Bulletin → départ conteneur.</p>
+            <p>ArrÃªt machine â†’ DI maintenance. Sortie de quart â†’ tank. Bulletin â†’ dÃ©part conteneur.</p>
           </div>
         </article>
       </div>

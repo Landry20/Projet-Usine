@@ -8,13 +8,20 @@ function pctTank(t: Tank) {
   return Math.min(100, Math.max(0, brut));
 }
 
+const TAILLES = {
+  s: { w: 88, h: 150 },
+  m: { w: 128, h: 220 },
+  l: { w: 210, h: 360 },
+  xl: { w: 280, h: 480 },
+};
+
 export function TankVisuel({
   tank,
   taille = 'm',
   anime = true,
 }: {
   tank: Tank;
-  taille?: 's' | 'm' | 'l';
+  taille?: 's' | 'm' | 'l' | 'xl';
   anime?: boolean;
 }) {
   const cible = pctTank(tank);
@@ -25,70 +32,92 @@ export function TankVisuel({
       return;
     }
     setPct(0);
-    const t = window.setTimeout(() => setPct(cible), 40);
-    return () => window.clearTimeout(t);
+    const id = window.setTimeout(() => setPct(cible), 50);
+    return () => window.clearTimeout(id);
   }, [cible, anime, tank.id]);
+
   const alerte = tank.alerteHaut || tank.alerteBas;
-  const uid = `tk${tank.id}`;
-  const h = taille === 'l' ? 320 : taille === 's' ? 168 : 228;
-  const w = taille === 'l' ? 176 : taille === 's' ? 92 : 124;
-  const descente = ((100 - pct) / 100) * 142;
+  const uid = `tk${tank.id}-${taille}`;
+  const dim = TAILLES[taille];
+  const cuveH = 150;
+  const descente = ((100 - pct) / 100) * cuveH;
 
   return (
-    <div className={`tank-visuel taille-${taille} ${alerte ? 'alerte' : ''} ${anime ? 'anime' : ''}`}>
-      <svg viewBox="0 0 120 220" width={w} height={h} role="img" aria-label={`Tank ${tank.code} rempli à ${pct.toFixed(0)} %`}>
+    <div className={`tank-visuel taille-${taille} ${alerte ? 'alerte' : ''}`}>
+      <svg viewBox="0 0 160 280" width={dim.w} height={dim.h} role="img" aria-label={`Tank ${tank.code} rempli à ${pct.toFixed(0)} %`}>
         <defs>
-          <linearGradient id={`${uid}-acier`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#8b97a8" />
-            <stop offset="18%" stopColor="#d5dce6" />
-            <stop offset="45%" stopColor="#f4f7fb" />
-            <stop offset="70%" stopColor="#c5cedb" />
-            <stop offset="100%" stopColor="#6d7889" />
+          <linearGradient id={`${uid}-metal`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#4a5564" />
+            <stop offset="14%" stopColor="#9aa6b6" />
+            <stop offset="32%" stopColor="#eef3f8" />
+            <stop offset="48%" stopColor="#c5ced8" />
+            <stop offset="72%" stopColor="#8b96a6" />
+            <stop offset="100%" stopColor="#3d4654" />
+          </linearGradient>
+          <linearGradient id={`${uid}-dôme`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f6f8fb" />
+            <stop offset="100%" stopColor="#8d97a6" />
           </linearGradient>
           <linearGradient id={`${uid}-huile`} x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0%" stopColor="#6b3d08" />
-            <stop offset="40%" stopColor="#c27812" />
+            <stop offset="0%" stopColor="#4a2806" />
+            <stop offset="45%" stopColor="#b86a0c" />
             <stop offset="100%" stopColor="#f0b429" />
           </linearGradient>
+          <radialGradient id={`${uid}-surf`} cx="40%" cy="40%" r="70%">
+            <stop offset="0%" stopColor="rgba(255,236,180,0.75)" />
+            <stop offset="100%" stopColor="rgba(140,70,8,0.15)" />
+          </radialGradient>
+          <filter id={`${uid}-ombre`} x="-20%" y="-10%" width="140%" height="130%">
+            <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#122033" floodOpacity="0.28" />
+          </filter>
           <clipPath id={`${uid}-cuve`}>
-            <rect x="22" y="38" width="76" height="142" rx="8" />
+            <path d="M28 58 C28 50 132 50 132 58 L132 208 C132 218 28 218 28 208 Z" />
           </clipPath>
         </defs>
 
-        <ellipse cx="60" cy="206" rx="38" ry="6" fill="rgba(18,28,45,0.12)" />
-        <rect x="30" y="182" width="8" height="22" rx="2" fill="#4b5568" />
-        <rect x="82" y="182" width="8" height="22" rx="2" fill="#4b5568" />
+        <ellipse cx="80" cy="262" rx="48" ry="8" fill="rgba(18,28,45,0.16)" />
+        <path d="M42 228 L36 258 L48 258 L52 228 Z" fill="#4b5568" />
+        <path d="M108 228 L112 258 L124 258 L118 228 Z" fill="#4b5568" />
+        <rect x="38" y="256" width="14" height="5" rx="1" fill="#2f3846" />
+        <rect x="108" y="256" width="14" height="5" rx="1" fill="#2f3846" />
 
-        <rect x="20" y="36" width="80" height="148" rx="10" fill={`url(#${uid}-acier)`} stroke="#3d4a5c" strokeWidth="1.6" />
-        <ellipse cx="60" cy="38" rx="40" ry="12" fill="#cfd6e1" stroke="#3d4a5c" strokeWidth="1.6" />
-        <ellipse cx="60" cy="182" rx="40" ry="10" fill="#9aa6b8" stroke="#3d4a5c" strokeWidth="1.4" />
+        <g filter={`url(#${uid}-ombre)`}>
+          <path d="M28 58 C28 50 132 50 132 58 L132 208 C132 218 28 218 28 208 Z" fill={`url(#${uid}-metal)`} />
+          <ellipse cx="80" cy="58" rx="52" ry="16" fill={`url(#${uid}-dôme)`} stroke="#3d4654" strokeWidth="1.4" />
+          <ellipse cx="80" cy="210" rx="52" ry="12" fill="#6d7786" stroke="#3d4654" strokeWidth="1.2" />
+        </g>
 
         <g clipPath={`url(#${uid}-cuve)`}>
           <g className="tank-huile" style={{ transform: `translate(0, ${descente}px)` }}>
-            <rect x="22" y="38" width="76" height="160" fill={`url(#${uid}-huile)`} />
-            <path className="tank-vague" d="M14 38 Q31 28 48 38 T82 38 T114 38 V50 H14 Z" fill="rgba(255,236,179,0.38)" />
+            <rect x="28" y="58" width="104" height="170" fill={`url(#${uid}-huile)`} />
+            <ellipse cx="80" cy="62" rx="50" ry="12" fill={`url(#${uid}-surf)`} className="tank-vague" />
           </g>
-          <rect x="28" y="40" width="10" height="136" fill="rgba(255,255,255,0.16)" rx="4" />
+          <path d="M40 62 C42 120 38 180 42 208" stroke="rgba(255,255,255,0.22)" strokeWidth="8" fill="none" strokeLinecap="round" />
         </g>
 
+        <ellipse cx="80" cy="58" rx="52" ry="16" fill="none" stroke="#2f3846" strokeWidth="1.8" />
+        <path d="M28 58 L28 208" stroke="#2f3846" strokeWidth="1.5" fill="none" />
+        <path d="M132 58 L132 208" stroke="#2f3846" strokeWidth="1.5" fill="none" />
+
         {[0, 25, 50, 75, 100].map((m) => {
-          const y = 178 - (m / 100) * 136;
+          const y = 208 - (m / 100) * 148;
           return (
             <g key={m}>
-              <line x1="18" y1={y} x2="24" y2={y} stroke="#3d4a5c" strokeWidth="1.2" />
-              <text x="14" y={y + 3} fontSize="7" textAnchor="end" fill="#5b6575">
+              <line x1="22" y1={y} x2="30" y2={y} stroke="#3d4654" strokeWidth="1.3" />
+              <text x="18" y={y + 3} fontSize="8" textAnchor="end" fill="#5b6575">
                 {m}
               </text>
             </g>
           );
         })}
 
-        <rect x="52" y="18" width="16" height="12" rx="2" fill="#4b5568" />
-        <rect x="48" y="12" width="24" height="8" rx="2" fill="#1f2a3d" />
-        <circle cx="60" cy="16" r="3" fill="#f0b429" />
-        <rect x="96" y="70" width="14" height="6" rx="2" fill="#4b5568" />
-        <rect x="108" y="64" width="6" height="18" rx="2" fill="#2f3b4d" />
-        <rect x="10" y="150" width="12" height="6" rx="2" fill="#4b5568" />
+        <rect x="68" y="28" width="24" height="16" rx="3" fill="#3d4654" />
+        <rect x="62" y="20" width="36" height="12" rx="3" fill="#1c2430" />
+        <circle cx="80" cy="26" r="4" fill="#f0b429" />
+        <rect x="130" y="92" width="18" height="8" rx="2" fill="#4b5568" />
+        <circle cx="150" cy="96" r="7" fill="#2f3846" stroke="#c5ced8" strokeWidth="1.4" />
+        <rect x="12" y="188" width="16" height="8" rx="2" fill="#4b5568" />
+        <circle cx="12" cy="192" r="6" fill="#2f3846" stroke="#c5ced8" strokeWidth="1.4" />
       </svg>
       <div className="tank-visuel-pct">{pct.toFixed(0)} %</div>
     </div>

@@ -38,6 +38,7 @@ import {
   LotsPage,
   MouvementsPfPage,
 } from './pages/produits-finis/ProduitsFinisPages';
+import { TanksPage } from './pages/produits-finis/TanksPages';
 import { ArticlesPage, StockPage } from './pages/stock/StockPages';
 import { ScanPage, SyncPage } from './pages/terrain/TerrainPages';
 import {
@@ -53,7 +54,6 @@ import {
   FicheJournalPage,
   JournauxQuartPage,
   NonConformitesPage,
-  TanksPage,
 } from './pages/usine-v2/UsineV2Pages';
 
 function Prive({ children }: { children: ReactNode }) {

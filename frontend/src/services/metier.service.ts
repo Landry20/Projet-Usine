@@ -184,8 +184,13 @@ export const metier = {
 
   tanks: () => api.get<Tank[]>('/tanks').then((r) => r.data),
   tank: (id: number) => api.get<Tank>(`/tanks/${id}`).then((r) => r.data),
+  creerTank: (payload: Record<string, unknown>) => api.post<Tank>('/tanks', payload).then((r) => r.data),
+  modifierTank: (id: number, payload: Record<string, unknown>) =>
+    api.patch<Tank>(`/tanks/${id}`, payload).then((r) => r.data),
+  supprimerTank: (id: number) => api.delete(`/tanks/${id}`).then((r) => r.data),
   jaugerTank: (id: number, payload: Record<string, unknown>) =>
     api.post(`/tanks/${id}/jaugeages`, payload).then((r) => r.data),
+  creerSite: (payload: Record<string, unknown>) => api.post<Site>('/sites', payload).then((r) => r.data),
 
   clients: () => api.get<ClientUsine[]>('/clients').then((r) => r.data),
   creerClient: (payload: Record<string, unknown>) => api.post<ClientUsine>('/clients', payload).then((r) => r.data),
