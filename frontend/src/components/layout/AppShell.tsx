@@ -195,7 +195,7 @@ export function AppShell() {
           </div>
         </header>
         <div className={`content ${mode === 'contenu' ? 'content-refresh' : ''}`}>
-          <Outlet key={`${cleContenu}-${usineId ?? 'all'}`} />
+          <Outlet key={`${loc.pathname}-${cleContenu}-${usineId ?? 'all'}`} />
         </div>
       </div>
       <nav className="mobile-nav">

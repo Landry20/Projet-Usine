@@ -961,17 +961,29 @@ span.btn-spinner {
   .compartiment-switch button { min-width: 40px; padding: 6px 8px; }
 }
 
+.content > * > *,
 .page-fluide > * {
-  animation: apparaitre 0.42s ease both;
+  animation: apparaitre 0.48s cubic-bezier(0.22, 0.7, 0.2, 1) both;
 }
-.page-fluide > *:nth-child(1) { animation-delay: 0.02s; }
-.page-fluide > *:nth-child(2) { animation-delay: 0.07s; }
-.page-fluide > *:nth-child(3) { animation-delay: 0.12s; }
-.page-fluide > *:nth-child(4) { animation-delay: 0.17s; }
-.page-fluide > *:nth-child(5) { animation-delay: 0.22s; }
+.content > * > *:nth-child(1), .page-fluide > *:nth-child(1) { animation-delay: 0.02s; }
+.content > * > *:nth-child(2), .page-fluide > *:nth-child(2) { animation-delay: 0.07s; }
+.content > * > *:nth-child(3), .page-fluide > *:nth-child(3) { animation-delay: 0.12s; }
+.content > * > *:nth-child(4), .page-fluide > *:nth-child(4) { animation-delay: 0.17s; }
+.content > * > *:nth-child(5), .page-fluide > *:nth-child(5) { animation-delay: 0.22s; }
+.content > * > *:nth-child(6), .page-fluide > *:nth-child(6) { animation-delay: 0.27s; }
+.content > * > *:nth-child(7), .page-fluide > *:nth-child(7) { animation-delay: 0.32s; }
+.content > * > *:nth-child(8), .page-fluide > *:nth-child(8) { animation-delay: 0.37s; }
 @keyframes apparaitre {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: brightness(1.35) saturate(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 .squelette-page { display: flex; flex-direction: column; gap: 14px; }
 .squelette {
