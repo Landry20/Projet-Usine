@@ -162,7 +162,22 @@ code, .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 .topbar-logo { height: 40px; max-width: 140px; }
 .brand-kicker { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-400); font-weight: 600; }
 .brand h1 { margin: 4px 0 0; font-size: 18px; color: #fff; font-weight: 600; }
-.nav { padding: 14px 10px; overflow: auto; flex: 1; }
+.nav {
+  padding: 14px 10px;
+  overflow: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #1a406e #0b1f3a;
+}
+.nav::-webkit-scrollbar { width: 8px; }
+.nav::-webkit-scrollbar-track { background: #0b1f3a; }
+.nav::-webkit-scrollbar-thumb {
+  background: #1a406e;
+  border-radius: 99px;
+  border: 2px solid #0b1f3a;
+}
+.nav::-webkit-scrollbar-thumb:hover { background: #24568a; }
+.nav::-webkit-scrollbar-corner { background: #0b1f3a; }
 .nav-group { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7f93ab; padding: 12px 12px 6px; }
 .nav a {
   display: flex; align-items: center; gap: 10px;
