@@ -43,6 +43,8 @@ import type {
 export const metier = {
   dashboard: () => api.get<DashboardData>('/dashboard').then((r) => r.data),
   notifications: () => api.get<NotificationItem[]>('/notifications').then((r) => r.data),
+  lireNotification: (id: string | number) =>
+    api.patch(`/notifications/${id}/lire`).then((r) => r.data),
 
   sites: () => api.get('/sites').then((r) => r.data),
   usines: () => api.get<Site[]>('/usines').then((r) => r.data),

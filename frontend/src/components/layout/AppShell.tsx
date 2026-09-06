@@ -26,8 +26,10 @@ import { useUsine } from '../../hooks/useUsine';
 import { MENUS } from '../../lib/menus';
 import { InviteInstallation } from '../pwa/InviteInstallation';
 import { LogoManuPro } from '../brand/LogoManuPro';
+import { Selecteur } from '../ui/Selecteur';
 import { SquelettePage } from '../ui/SquelettePage';
 import { metier } from '../../services/metier.service';
+import type { NotificationItem } from '../../types';
 
 function initiales(prenom?: string | null, nom?: string) {
   return `${(prenom ?? '').charAt(0)}${(nom ?? '').charAt(0)}`.toUpperCase() || 'U';
@@ -331,20 +333,19 @@ function SelectUsine() {
     return actuelle ? <span className="usine-fixe">{actuelle.libelle}</span> : null;
   }
   return (
-    <label className="usine-select">
-      <Warehouse size={14} />
-      <select
-        value={usineId ?? ''}
-        onChange={(e) => setUsineId(e.target.value ? Number(e.target.value) : null)}
-      >
-        <option value="">Toutes les usines</option>
-        {usines.map((u) => (
-          <option key={u.id} value={u.id}>
-            {u.libelle}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Selecteur
+      className="sel-compact"
+      icone={<Warehouse size={14} />}
+      value={usineId ? String(usineId) : ''}
+      onChange={(e) => setUsineId(e.target.value ? Number(e.target.value) : null)}
+    >
+      <option value="">Toutes les usines</option>
+      {usines.map((u) => (
+        <option key={u.id} value={u.id}>
+          {u.libelle}
+        </option>
+      ))}
+    </Selecteur>
   );
 }
 
@@ -354,34 +355,50 @@ function SelectCompartiment() {
   const choix = COMPARTIMENTS.filter((c) => disponibles.includes(c.code));
   if (!choix.length) return null;
   return (
-    <label className="usine-select">
-      {iconeCompartiment(actif)}
-      <select
-        aria-label="Compartiment"
-        value={actif}
-        onChange={(e) => {
-          const code = e.target.value as CodeCompartiment;
-          setActif(code);
-          nav(ACCUEIL_COMPARTIMENT[code]);
-        }}
-      >
-        {choix.map((c) => (
-          <option key={c.code} value={c.code}>
-            {c.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Selecteur
+      className="sel-compact"
+      icone={iconeCompartiment(actif)}
+      value={actif}
+      onChange={(e) => {
+        const code = e.target.value as CodeCompartiment;
+        setActif(code);
+        nav(ACCUEIL_COMPARTIMENT[code]);
+      }}
+    >
+      {choix.map((c) => (
+        <option key={c.code} value={c.code}>
+          {c.label}
+        </option>
+      ))}
+    </Selecteur>
   );
 }
 
 function BoutonNotifications() {
   const [ouvert, setOuvert] = useState(false);
-  const [liste, setListe] = useState<Array<{ id: string; titre: string; message?: string | null; lu: boolean }>>([]);
+  const [liste, setListe] = useState<NotificationItem[]>([]);
   const racine = useRef<HTMLDivElement>(null);
 
+  function charger() {
+    metier
+      .notifications()
+      .then((n) => setListe(Array.isArray(n) ? n : []))
+      .catch(() => setListe([]));
+  }
+
   useEffect(() => {
-    metier.notifications().then((n) => setListe(Array.isArray(n) ? n : [])).catch(() => setListe([]));
+    charger();
+    const id = window.setInterval(charger, 3000);
+    function vis() {
+      if (document.visibilityState === 'visible') charger();
+    }
+    window.addEventListener('focus', charger);
+    document.addEventListener('visibilitychange', vis);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener('focus', charger);
+      document.removeEventListener('visibilitychange', vis);
+    };
   }, []);
 
   useEffect(() => {
@@ -392,11 +409,31 @@ function BoutonNotifications() {
     return () => document.removeEventListener('mousedown', dehors);
   }, []);
 
+  const nav = useNavigate();
   const nonLues = liste.filter((n) => !n.lu).length;
+
+  async function ouvrirNotif(n: NotificationItem) {
+    if (!n.lu) {
+      setListe((prev) => prev.map((x) => (x.id === n.id ? { ...x, lu: true } : x)));
+      metier.lireNotification(n.id).catch(() => charger());
+    }
+    setOuvert(false);
+    if (n.lien) nav(n.lien);
+  }
 
   return (
     <div className="notif-wrap" ref={racine}>
-      <button type="button" className="icon-btn" title="Notifications" onClick={() => setOuvert((v) => !v)}>
+      <button
+        type="button"
+        className="icon-btn"
+        title="Notifications"
+        onClick={() => {
+          setOuvert((v) => {
+            if (!v) charger();
+            return !v;
+          });
+        }}
+      >
         <Bell size={17} />
         {nonLues > 0 && <span className="notif-badge">{nonLues}</span>}
       </button>
@@ -404,10 +441,16 @@ function BoutonNotifications() {
         <div className="notif-menu">
           <strong>Notifications</strong>
           {liste.length === 0 && <p>Aucune notification pour le moment.</p>}
-          {liste.slice(0, 6).map((n) => (
-            <div key={n.id} className={n.lu ? '' : 'non-lue'}>
-              {n.titre}
-            </div>
+          {liste.slice(0, 8).map((n) => (
+            <button
+              key={n.id}
+              type="button"
+              className={`notif-item ${n.lu ? '' : 'non-lue'}`}
+              onClick={() => void ouvrirNotif(n)}
+            >
+              <span>{n.titre}</span>
+              {n.message && <em>{n.message}</em>}
+            </button>
           ))}
         </div>
       )}
