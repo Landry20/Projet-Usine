@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Bell,
   Boxes,
-  Check,
-  ChevronDown,
   Factory,
   FlaskConical,
   LayoutDashboard,
@@ -26,7 +25,9 @@ import { ACCUEIL_COMPARTIMENT, COMPARTIMENTS, useCompartiment, type CodeComparti
 import { useUsine } from '../../hooks/useUsine';
 import { MENUS } from '../../lib/menus';
 import { InviteInstallation } from '../pwa/InviteInstallation';
+import { LogoManuPro } from '../brand/LogoManuPro';
 import { SquelettePage } from '../ui/SquelettePage';
+import { metier } from '../../services/metier.service';
 
 function initiales(prenom?: string | null, nom?: string) {
   return `${(prenom ?? '').charAt(0)}${(nom ?? '').charAt(0)}`.toUpperCase() || 'U';
@@ -91,6 +92,7 @@ export function AppShell() {
       <aside className={`sidebar ${tiroir ? 'open' : ''}`}>
         <div className="brand">
           <div className="brand-row">
+            <LogoManuPro className="brand-icon" />
             <div>
               <div className="brand-kicker">{COMPARTIMENTS.find((c) => c.code === actif)?.kicker}</div>
               <h1>ManuPro</h1>
@@ -132,27 +134,10 @@ export function AppShell() {
             </button>
             <h2>{titrePage(loc.pathname)}</h2>
           </div>
-          <div className="compartiment-choix">
-            <nav className="compartiment-switch" aria-label="Compartiments">
-              {COMPARTIMENTS.filter((c) => disponibles.includes(c.code)).map((c) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  className={c.code === actif ? 'active' : ''}
-                  onClick={() => {
-                    setActif(c.code);
-                    nav(ACCUEIL_COMPARTIMENT[c.code]);
-                  }}
-                >
-                  {iconeCompartiment(c.code)}
-                  <span className="switch-label">{c.label}</span>
-                </button>
-              ))}
-            </nav>
-            {disponibles.length > 1 && <SelectCompartiment />}
-          </div>
           <div className="topbar-actions">
+            <SelectCompartiment />
             <SelectUsine />
+            <BoutonNotifications />
             {actif === 'MAINTENANCE' && (
               <NavLink to="/terrain/scan" className="btn btn-gold btn-scan">
                 <QrCode size={16} />
@@ -366,10 +351,38 @@ function SelectUsine() {
 function SelectCompartiment() {
   const { actif, disponibles, setActif } = useCompartiment();
   const nav = useNavigate();
-  const [ouvert, setOuvert] = useState(false);
-  const racine = useRef<HTMLDivElement>(null);
   const choix = COMPARTIMENTS.filter((c) => disponibles.includes(c.code));
-  const actuel = choix.find((c) => c.code === actif);
+  if (!choix.length) return null;
+  return (
+    <label className="usine-select">
+      {iconeCompartiment(actif)}
+      <select
+        aria-label="Compartiment"
+        value={actif}
+        onChange={(e) => {
+          const code = e.target.value as CodeCompartiment;
+          setActif(code);
+          nav(ACCUEIL_COMPARTIMENT[code]);
+        }}
+      >
+        {choix.map((c) => (
+          <option key={c.code} value={c.code}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function BoutonNotifications() {
+  const [ouvert, setOuvert] = useState(false);
+  const [liste, setListe] = useState<Array<{ id: string; titre: string; message?: string | null; lu: boolean }>>([]);
+  const racine = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    metier.notifications().then((n) => setListe(Array.isArray(n) ? n : [])).catch(() => setListe([]));
+  }, []);
 
   useEffect(() => {
     function dehors(e: MouseEvent) {
@@ -379,49 +392,31 @@ function SelectCompartiment() {
     return () => document.removeEventListener('mousedown', dehors);
   }, []);
 
+  const nonLues = liste.filter((n) => !n.lu).length;
+
   return (
-    <div className={`sel compartiment-select ${ouvert ? 'open' : ''}`} ref={racine}>
-      <button
-        type="button"
-        className="sel-btn has-ico"
-        aria-label="Choisir un compartiment"
-        aria-expanded={ouvert}
-        onClick={() => setOuvert((v) => !v)}
-      >
-        <span className="sel-ico">{iconeCompartiment(actif)}</span>
-        <span className="sel-val">{actuel?.label}</span>
-        <ChevronDown size={16} className="sel-chevron" />
+    <div className="notif-wrap" ref={racine}>
+      <button type="button" className="icon-btn" title="Notifications" onClick={() => setOuvert((v) => !v)}>
+        <Bell size={17} />
+        {nonLues > 0 && <span className="notif-badge">{nonLues}</span>}
       </button>
       {ouvert && (
-        <ul className="sel-liste" role="listbox">
-          {choix.map((c) => (
-            <li key={c.code}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={c.code === actif}
-                className={`sel-opt ${c.code === actif ? 'active' : ''}`}
-                onClick={() => {
-                  setActif(c.code);
-                  nav(ACCUEIL_COMPARTIMENT[c.code]);
-                  setOuvert(false);
-                }}
-              >
-                <span className="sel-opt-ligne">
-                  {iconeCompartiment(c.code)}
-                  {c.label}
-                </span>
-                {c.code === actif && <Check size={15} />}
-              </button>
-            </li>
+        <div className="notif-menu">
+          <strong>Notifications</strong>
+          {liste.length === 0 && <p>Aucune notification pour le moment.</p>}
+          {liste.slice(0, 6).map((n) => (
+            <div key={n.id} className={n.lu ? '' : 'non-lue'}>
+              {n.titre}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
 }
 
 function titrePage(path: string) {
+  if (path.startsWith('/employes')) return 'Employés';
   if (path.startsWith('/profil')) return 'Mon profil';
   if (path.startsWith('/parametres')) return 'Paramètres';
   if (path.startsWith('/production/demandes-matiere')) return 'Demandes de matière';

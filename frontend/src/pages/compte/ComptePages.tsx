@@ -151,9 +151,10 @@ export function ParametresPage() {
     try {
       const s = await metier.creerSite(siteForm);
       await rafraichirUsines();
+      setUsineId(s.id);
       setSites((liste) => [...liste, s]);
       setSiteForm({ code: '', libelle: '', ville: '' });
-      setMsg(`Usine ${s.libelle} créée.`);
+      setMsg(`Usine ${s.libelle} créée. Vous êtes maintenant sur ce site.`);
     } catch (ex) {
       setErr(messageApi(ex));
     } finally {

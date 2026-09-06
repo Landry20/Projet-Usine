@@ -27,4 +27,8 @@ export const authService = {
     const { data } = await api.patch<Utilisateur>('/auth/profil', payload);
     return data;
   },
+  async choisirSite(siteId: number | null) {
+    const { data } = await api.patch<Utilisateur>('/auth/site', { siteId });
+    return data;
+  },
 };

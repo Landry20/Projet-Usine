@@ -64,6 +64,7 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
     exploitation: [
       { to: '/direction', label: 'Vue consolidée', Icon: LineChart, end: true },
       { to: '/direction/achats', label: 'Demandes MP / commandes', Icon: Package },
+      { to: '/employes', label: 'Employés', perm: 'direction.lire', Icon: Users },
     ],
   },
   MAINTENANCE: {
@@ -77,6 +78,7 @@ export const MENUS: Record<CodeCompartiment, { exploitation: LienMenu[]; systeme
       { to: '/techniciens', label: 'Techniciens', perm: 'referentiel.lire', Icon: Users },
     ],
     systeme: [
+      { to: '/employes', label: 'Employés', perm: 'direction.lire', Icon: Users },
       { to: '/admin/utilisateurs', label: 'Administration', perm: 'utilisateur.gerer', Icon: Shield },
       { to: '/admin/audit', label: "Journal d'audit", perm: 'audit.lire', Icon: Shield },
     ],

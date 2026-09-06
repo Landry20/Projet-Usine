@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
+import { PortailPremierSite } from './components/layout/PortailPremierSite';
+import { EmployesPage } from './pages/employes/EmployesPage';
 import { PageChargement } from './components/ui/PageChargement';
 import { useAuth } from './hooks/useAuth';
 import { ACCUEIL_COMPARTIMENT, useCompartiment } from './hooks/useCompartiment';
@@ -88,7 +90,9 @@ export function App() {
       <Route
         element={
           <Prive>
-            <AppShell />
+            <PortailPremierSite>
+              <AppShell />
+            </PortailPremierSite>
           </Prive>
         }
       >
@@ -140,6 +144,7 @@ export function App() {
         <Route path="/stock" element={<StockPage />} />
         <Route path="/articles" element={<ArticlesPage />} />
         <Route path="/techniciens" element={<TechniciensPage />} />
+        <Route path="/employes" element={<EmployesPage />} />
         <Route path="/admin/utilisateurs" element={<UtilisateursPage />} />
         <Route path="/admin/audit" element={<AuditPage />} />
         <Route path="/profil" element={<ProfilPage />} />

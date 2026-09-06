@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from './useAuth';
+import { authService } from '../services/auth.service';
 import { metier } from '../services/metier.service';
 import type { Site } from '../types';
 
@@ -11,6 +12,7 @@ interface Ctx {
   setUsineId: (id: number | null) => void;
   rafraichirUsines: () => Promise<void>;
   peutChanger: boolean;
+  pret: boolean;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -19,8 +21,9 @@ export function UsineProvider({ children }: { children: ReactNode }) {
   const { utilisateur } = useAuth();
   const [usines, setUsines] = useState<Site[]>([]);
   const [usineId, setEtat] = useState<number | null>(null);
+  const [pret, setPret] = useState(false);
   const role = utilisateur?.role?.code;
-  const peutChanger = ['ADMIN', 'DIRECTION', 'DIRECTION_GENERALE', 'CHEF_USINE'].includes(role ?? '');
+  const peutChanger = ['ADMIN', 'DIRECTION_GENERALE'].includes(role ?? '');
 
   async function rafraichirUsines() {
     try {
@@ -33,9 +36,10 @@ export function UsineProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!utilisateur) {
       setUsines([]);
+      setPret(false);
       return;
     }
-    void rafraichirUsines();
+    void rafraichirUsines().finally(() => setPret(true));
   }, [utilisateur?.id]);
 
   useEffect(() => {
@@ -49,7 +53,8 @@ export function UsineProvider({ children }: { children: ReactNode }) {
     }
     const sauve = Number(sessionStorage.getItem(CLE));
     if (Number.isFinite(sauve) && sauve > 0) setEtat(sauve);
-    else setEtat(utilisateur.siteId ?? null);
+    else if (utilisateur.siteId) setEtat(utilisateur.siteId);
+    else setEtat(null);
   }, [utilisateur?.id, utilisateur?.siteId, peutChanger]);
 
   const valeur = useMemo<Ctx>(
@@ -57,14 +62,16 @@ export function UsineProvider({ children }: { children: ReactNode }) {
       usineId,
       usines,
       peutChanger,
+      pret,
       rafraichirUsines,
       setUsineId: (id) => {
         setEtat(id);
         if (id) sessionStorage.setItem(CLE, String(id));
         else sessionStorage.removeItem(CLE);
+        if (peutChanger && id) void authService.choisirSite(id).catch(() => undefined);
       },
     }),
-    [usineId, usines, peutChanger],
+    [usineId, usines, peutChanger, pret],
   );
 
   return <C.Provider value={valeur}>{children}</C.Provider>;

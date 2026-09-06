@@ -108,6 +108,9 @@ export const metier = {
   techniciens: () => api.get<Technicien[]>('/techniciens').then((r) => r.data),
   utilisateurs: (params?: Record<string, unknown>) => api.get('/utilisateurs', { params }).then((r) => r.data),
   creerUtilisateur: (payload: Record<string, unknown>) => api.post('/utilisateurs', payload).then((r) => r.data),
+  modifierUtilisateur: (id: number, payload: Record<string, unknown>) =>
+    api.patch(`/utilisateurs/${id}`, payload).then((r) => r.data),
+  desactiverUtilisateur: (id: number) => api.delete(`/utilisateurs/${id}`).then((r) => r.data),
   roles: () => api.get('/roles').then((r) => r.data),
   audit: (params?: Record<string, unknown>) => api.get('/audit', { params }).then((r) => r.data),
 
